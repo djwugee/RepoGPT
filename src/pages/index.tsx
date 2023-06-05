@@ -235,6 +235,7 @@ export default function Home() {
               {
                 storageKey: 'openai-api-key',
                 label: 'OpenAI API Key',
+                placeholder: 'sk-890r6E...KwrM',
                 type: showPassword ? 'text' : 'password',
                 value: apiKey,
                 setValue: setApiKey,
@@ -248,6 +249,7 @@ export default function Home() {
                 label: 'GitHub Token',
                 type: showGithubToken ? 'text' : 'password',
                 value: gitHubToken,
+                placeholder: 'github_pat_11A...GCS',
                 setValue: setGitHubToken,
                 link: 'https://github.com/settings/tokens',
                 buttonText: 'Save',
@@ -258,6 +260,7 @@ export default function Home() {
                 storageKey: 'repo-url',
                 type: 'text',
                 label: 'Repo URL',
+                placeholder: 'https://github.com/Markkop/RepoGPT',
                 value: repoUrl,
                 setValue: setRepoUrl,
                 buttonText: 'Fetch'
@@ -277,6 +280,7 @@ export default function Home() {
                     id={field.storageKey}
                     name={field.storageKey}
                     value={field.value}
+                    placeholder={field.placeholder}
                     onChange={(e) => field.setValue(e.target.value)}
                   />
                   {field.showToggle && (
@@ -363,7 +367,7 @@ export default function Home() {
           name="instruction"
           rows={20}
           cols={80}
-          placeholder="rewrite this entire application"
+          placeholder="Using Clean Code, refactor the following code to make it more readable."
           required
           value={instruction}
           onChange={(e) => setInstruction(e.target.value)}
