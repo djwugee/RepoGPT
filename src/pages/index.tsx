@@ -206,8 +206,13 @@ export default function Home() {
     <div className="font-sans p-5 max-w-4xl mx-auto">
       <h1 className="font-bold text-2xl mb-5">🗃️ RepoGPT</h1>
 
-      <p>
-        Use this tool to merge files from a Github repository and copy them or send them to OpenAI API with a prompt.
+      <p>Merge files from a Github repository to send them to OpenAI API with a prompt.</p>
+      <p className="text-sm">
+        Tip: if you have ChatGPT Plus, copy/paste the preview in the{' '}
+        <span className="underline">
+          <a href="https://chatgpt.com">chat</a>
+        </span>{' '}
+        to save API costs
       </p>
 
       <br />
