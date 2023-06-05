@@ -9,7 +9,7 @@
   textarea,
   input,
   select {
-    @apply p-2 border border-accent rounded-md bg-background text-tertiary;
+    @apply p-2 border border-accent rounded-md bg-background text-tertiary disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   input[type='checkbox'] {
@@ -18,7 +18,7 @@
 
   button,
   button[type='submit'] {
-    @apply text-accent hover:text-background hover:bg-accent border border-accent hover:border-accent px-4 py-2 rounded transition-colors duration-150 ease-in-out;
+    @apply text-accent hover:text-background hover:bg-accent border border-accent hover:border-accent px-4 py-2 rounded transition-colors duration-150 ease-in-out disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:opacity-50;
   }
 }
 

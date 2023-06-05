@@ -4,6 +4,7 @@ import { ExternalLinkIcon } from '../components/ExternalLinkIcon'
 import { GhRibbon } from '../components/GhRibbon'
 import { EyeSlashIcon } from '../components/EyeSlashIcon'
 import { EyeIcon } from '../components/EyeIcon'
+import { SpinnerIcon } from '../components/SpinnerIcon'
 import { githubAPIRequest, handleCopyToClipboard, openAIRequest, retrieveValueFromLocalStorage } from '../utils'
 
 export default function Home() {
@@ -27,6 +28,9 @@ export default function Home() {
   const [showCopyConfirmation, setShowCopyConfirmation] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showGithubToken, setShowGithubToken] = useState(false)
+  const [isFetchingFileTree, setIsFetchingFileTree] = useState(false)
+  const [isLoadingFiles, setIsLoadingFiles] = useState(false)
+  const [isCompletingChat, setIsCompletingChat] = useState(false)
 
   useEffect(() => {
     retrieveValueFromLocalStorage('openai-api-key', setOpenAIApiKey, '')
@@ -73,6 +77,7 @@ export default function Home() {
   const handleGetFileTree = async (e) => {
     try {
       e.preventDefault()
+      setIsFetchingFileTree(true)
       setGithubError(null)
       localStorage.setItem('github-repo-url', repoUrl)
       const repoPath = repoUrl.split('github.com/')[1]
@@ -89,10 +94,13 @@ export default function Home() {
     } catch (error) {
       console.error(error)
       setGithubError(error.message)
+    } finally {
+      setIsFetchingFileTree(false)
     }
   }
 
   const updateMergedFilesPreview = async () => {
+    setIsLoadingFiles(true)
     const fileContents = await Promise.all(
       selectedFiles.map(async (file) => {
         try {
@@ -108,9 +116,9 @@ export default function Home() {
         }
       })
     )
-
     const mergedFiles = fileContents.join('\n')
     setMergedFiles(mergedFiles)
+    setIsLoadingFiles(false)
   }
 
   useEffect(() => {
@@ -120,6 +128,7 @@ export default function Home() {
   const handleSendToOpenAI = async (e) => {
     try {
       e.preventDefault()
+      setIsCompletingChat(true)
       setOpenAIError(null)
       if (!openAIApiKey) {
         setOpenAIError('Please enter an OpenAI API key')
@@ -146,6 +155,8 @@ export default function Home() {
     } catch (error) {
       console.error(error)
       setOpenAIError(error.message)
+    } finally {
+      setIsCompletingChat(false)
     }
   }
 
@@ -217,44 +228,49 @@ export default function Home() {
                 setValue: setRepoUrl,
                 buttonText: 'Fetch'
               }
-            ].map((field) => (
-              <div key={field.storageKey}>
-                <div className="flex gap-2 mb-2">
-                  <h2 className="text-primary my-auto">{field.label}</h2>
-                  {field.link && (
-                    <ExternalLinkIcon svgClassName="text-primary h-3 w-3" className="my-auto" href={field.link} />
-                  )}
+            ].map((field) => {
+              const isRepoUrl = field.storageKey === 'repo-url'
+              return (
+                <div key={field.storageKey}>
+                  <div className="flex gap-2 mb-2">
+                    <h2 className="text-primary my-auto">{field.label}</h2>
+                    {field.link && (
+                      <ExternalLinkIcon svgClassName="text-primary h-3 w-3" className="my-auto" href={field.link} />
+                    )}
+                  </div>
+                  <div className="flex gap-2 items-center">
+                    <input
+                      className="w-96 text-field"
+                      type={field.type}
+                      id={field.storageKey}
+                      name={field.storageKey}
+                      value={field.value}
+                      placeholder={field.placeholder}
+                      onChange={(e) => field.setValue(e.target.value)}
+                      disabled={isRepoUrl && isFetchingFileTree}
+                    />
+                    {field.showToggle && (
+                      <div onClick={() => field.showToggle(!field.isShowing)}>
+                        {field.isShowing ? <EyeIcon /> : <EyeSlashIcon />}
+                      </div>
+                    )}
+                    <button
+                      id={`save-${field.storageKey}`}
+                      type={isRepoUrl ? 'submit' : 'button'}
+                      onClick={() => localStorage.setItem(field.storageKey, field.value)}
+                      disabled={isRepoUrl && isFetchingFileTree}
+                    >
+                      {isFetchingFileTree && isRepoUrl ? <SpinnerIcon /> : 'Fetch'}
+                    </button>
+                  </div>
+                  <div className="text-sm mt-2 opacity-70">
+                    {field.label === 'GitHub Token' && (
+                      <p>GitHub Token is optional, needed only for a higher rate limit and private repo access.</p>
+                    )}
+                  </div>
                 </div>
-                <div className="flex gap-2 items-center">
-                  <input
-                    className="w-96 text-field"
-                    type={field.type}
-                    id={field.storageKey}
-                    name={field.storageKey}
-                    value={field.value}
-                    placeholder={field.placeholder}
-                    onChange={(e) => field.setValue(e.target.value)}
-                  />
-                  {field.showToggle && (
-                    <div onClick={() => field.showToggle(!field.isShowing)}>
-                      {field.isShowing ? <EyeIcon /> : <EyeSlashIcon />}
-                    </div>
-                  )}
-                  <button
-                    id={`save-${field.storageKey}`}
-                    type={field.storageKey === 'repo-url' ? 'submit' : 'button'}
-                    onClick={() => localStorage.setItem(field.storageKey, field.value)}
-                  >
-                    {field.buttonText}
-                  </button>
-                </div>
-                <div className="text-sm mt-2 opacity-70">
-                  {field.label === 'GitHub Token' && (
-                    <p>GitHub Token is optional, needed only for a higher rate limit and private repo access.</p>
-                  )}
-                </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
           {githubError && <div className="text-error">{githubError}</div>}
         </form>
@@ -300,6 +316,7 @@ export default function Home() {
               >
                 {showCopyConfirmation ? 'Copied!' : 'Copy'}
               </button>
+              {isLoadingFiles && <SpinnerIcon />}
             </div>
             <textarea
               className="w-full h-full text-3xs"
@@ -393,8 +410,8 @@ export default function Home() {
           ))}
         </div>
 
-        <button className="my-4" id="send-to-openai" onClick={handleSendToOpenAI}>
-          Send to OpenAI
+        <button className="my-4" id="send-to-openai" onClick={handleSendToOpenAI} disabled={isCompletingChat}>
+          {isCompletingChat ? <SpinnerIcon /> : 'Send to OpenAI'}
         </button>
         {openAIError && <div className="text-error">{openAIError}</div>}
 
