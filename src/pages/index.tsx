@@ -16,14 +16,23 @@ export default function Home() {
   const [gitHubToken, setGitHubToken] = useState('')
 
   const displayFileTree = async (fileTree, indentLevel = 0) => {
+    let allFiles = []
     for (const file of fileTree) {
+      file.indentLevel = indentLevel
+      allFiles.push(file)
       if (file.type === 'dir') {
         const response = await fetch(file.url)
         const childFileTree = await response.json()
-        await displayFileTree(childFileTree, indentLevel + 1)
+        // Ensure that childFileTree is an array before trying to iterate over it
+        if (Array.isArray(childFileTree)) {
+          const childFiles = await displayFileTree(childFileTree, indentLevel + 1)
+          allFiles = [...allFiles, ...childFiles]
+        } else {
+          console.error('Child file tree is not iterable:', childFileTree)
+        }
       }
     }
-    return fileTree
+    return allFiles
   }
 
   const handleSelectFile = (file, checked) => {
