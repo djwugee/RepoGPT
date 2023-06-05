@@ -204,7 +204,13 @@ export default function Home() {
 
   return (
     <div className="font-sans p-5 max-w-4xl mx-auto">
-      <h1 className="font-bold text-2xl mb-5">RepoGPT</h1>
+      <h1 className="font-bold text-2xl mb-5">🗃️ RepoGPT</h1>
+
+      <p>
+        Use this tool to merge files from a Github repository and copy them or send them to OpenAI API with a prompt.
+      </p>
+
+      <br />
 
       <div className="flex-col space-y-4">
         {[
