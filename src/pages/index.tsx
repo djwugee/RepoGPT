@@ -57,7 +57,11 @@ export default function Home() {
       file.indentLevel = indentLevel
       allFiles.push(file)
       if (file.type === 'dir') {
-        const response = await fetch(file.url)
+        const headers = {} as any
+        if (gitHubToken) {
+          headers.Authorization = `token ${gitHubToken}`
+        }
+        const response = await fetch(file.url, { headers })
         const childFileTree = await response.json()
         // Ensure that childFileTree is an array before trying to iterate over it
         if (Array.isArray(childFileTree)) {
