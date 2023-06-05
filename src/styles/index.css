@@ -9,7 +9,7 @@
   textarea,
   input,
   select {
-    @apply p-2 mr-2 border border-accent rounded-md bg-background text-tertiary;
+    @apply p-2 border border-accent rounded-md bg-background text-tertiary;
   }
 
   input[type='checkbox'] {

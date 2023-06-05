@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { twMerge } from 'tailwind-merge'
 import { ExternalLinkIcon } from '../components/ExternalLinkIcon'
 import { GhRibbon } from '../components/GhRibbon'
+import { EyeSlashIcon } from '../components/EyeSlashIcon'
+import { EyeIcon } from '../components/EyeIcon'
 
 export default function Home() {
   const [apiKey, setApiKey] = useState('')
@@ -20,6 +22,8 @@ export default function Home() {
   const [githubError, setGithubError] = useState(null)
   const [openAIError, setOpenAIError] = useState(null)
   const [showCopyConfirmation, setShowCopyConfirmation] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showGithubToken, setShowGithubToken] = useState(false)
 
   const handleCopyToClipboard = async () => {
     try {
@@ -208,7 +212,7 @@ export default function Home() {
   return (
     <main className="bg-background text-secondary">
       <div className="bg-surface font-sans px-5 max-w-4xl mx-auto shadow-l-lg relative">
-        <GhRibbon className="" />
+        <GhRibbon />
         <h1 className="font-bold text-2xl mb-5 text-primary">🗃️ RepoGPT</h1>
 
         <p>Merge files from a Github repository to send them to OpenAI API with a prompt.</p>
@@ -227,20 +231,24 @@ export default function Home() {
               {
                 storageKey: 'openai-api-key',
                 label: 'OpenAI API Key',
-                type: 'password',
+                type: showPassword ? 'text' : 'password',
                 value: apiKey,
                 setValue: setApiKey,
                 link: 'https://platform.openai.com/account/api-keys',
-                buttonText: 'Save'
+                buttonText: 'Save',
+                showToggle: setShowPassword,
+                isShowing: showPassword
               },
               {
                 storageKey: 'github-token',
                 label: 'GitHub Token',
-                type: 'password',
+                type: showGithubToken ? 'text' : 'password',
                 value: gitHubToken,
                 setValue: setGitHubToken,
                 link: 'https://github.com/settings/tokens',
-                buttonText: 'Save'
+                buttonText: 'Save',
+                showToggle: setShowGithubToken,
+                isShowing: showGithubToken
               },
               {
                 storageKey: 'repo-url',
@@ -267,6 +275,11 @@ export default function Home() {
                     value={field.value}
                     onChange={(e) => field.setValue(e.target.value)}
                   />
+                  {field.showToggle && (
+                    <div onClick={() => field.showToggle(!field.isShowing)}>
+                      {field.isShowing ? <EyeIcon /> : <EyeSlashIcon />}
+                    </div>
+                  )}
                   <button
                     id={`save-${field.storageKey}`}
                     onClick={() => localStorage.setItem(field.storageKey, field.value)}
