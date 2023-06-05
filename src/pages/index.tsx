@@ -168,39 +168,54 @@ export default function Home() {
     <div className="font-sans p-5 max-w-4xl mx-auto">
       <h1 className="font-bold text-2xl mb-5">RepoGPT</h1>
 
-      <div className="flex items-center">
-        <input
-          className="w-96 mr-2 py-2 border border-gray-300 rounded-md"
-          type="password"
-          id="openai-key"
-          name="openai-key"
-          value={apiKey}
-          onChange={(e) => setApiKey(e.target.value)}
-        />
-        <button
-          className="bg-indigo-500 text-white px-4 py-2 rounded"
-          id="save-api-key"
-          onClick={() => localStorage.setItem('openai-api-key', apiKey)}
-        >
-          Save Key
-        </button>
-      </div>
-      <div className="flex items-center">
-        <input
-          className="w-96 mr-2 py-2 border border-gray-300 rounded-md"
-          type="password"
-          id="github-token"
-          name="github-token"
-          value={gitHubToken}
-          onChange={(e) => setGitHubToken(e.target.value)}
-        />
-        <button
-          className="bg-indigo-500 text-white px-4 py-2 rounded"
-          id="save-github-token"
-          onClick={() => localStorage.setItem('github-token', gitHubToken)}
-        >
-          Save GitHub Token
-        </button>
+      <div className="flex-col space-y-4">
+        {[
+          {
+            storageKey: 'openai-api-key',
+            label: 'OpenAI API Key',
+            value: apiKey,
+            setValue: setApiKey,
+            link: 'https://platform.openai.com/account/api-keys'
+          },
+          {
+            storageKey: 'github-token',
+            label: 'GitHub Token',
+            optional: true,
+            value: gitHubToken,
+            setValue: setGitHubToken,
+            link: 'https://github.com/settings/tokens'
+          }
+        ].map((field) => (
+          <div>
+            <div key={field.storageKey} className="flex items-center">
+              <input
+                className="w-96 mr-2 py-2 border border-gray-300 rounded-md"
+                type="password"
+                id={field.storageKey}
+                name={field.storageKey}
+                value={field.value}
+                onChange={(e) => field.setValue(e.target.value)}
+              />
+              <button
+                className="bg-indigo-500 text-white px-4 py-2 rounded"
+                id={`save-${field.storageKey}`}
+                onClick={() => localStorage.setItem(field.storageKey, field.value)}
+              >
+                Save {`${field.label}${field.optional ? '' : '*'}`}
+              </button>
+            </div>
+            <div className="text-sm ">
+              {field.label === 'GitHub Token' && (
+                <p>GitHub Token is optional, needed only for a higher rate limit and private repo access.</p>
+              )}
+              {field.link && (
+                <p className="underline">
+                  <a href={field.link}>Click here to generate an {field.label.toLowerCase()}</a>
+                </p>
+              )}
+            </div>
+          </div>
+        ))}
       </div>
 
       <br />
