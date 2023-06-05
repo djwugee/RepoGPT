@@ -313,18 +313,21 @@ export default function Home() {
                 <div key={index} style={{ marginLeft: `${file.indentLevel * 10}px` }}>
                   <label
                     className={twMerge(
-                      'text-secondary opacity-70',
+                      'text-secondary opacity-90',
                       selectedFiles.includes(file) && 'text-primary opacity-100',
-                      file.type === 'dir' && 'opacity-20'
+                      file.type === 'dir' && 'opacity-70'
                     )}
                   >
-                    <input
-                      className="mr-2"
-                      type="checkbox"
-                      disabled={file.type === 'dir'}
-                      onChange={(e) => handleSelectFile(file, e.target.checked)}
-                      checked={selectedFiles.includes(file)}
-                    />
+                    {file.type === 'dir' ? (
+                      <>📁 </>
+                    ) : (
+                      <input
+                        className="mr-2"
+                        type="checkbox"
+                        onChange={(e) => handleSelectFile(file, e.target.checked)}
+                        checked={selectedFiles.includes(file)}
+                      />
+                    )}
                     {file.name}
                   </label>
                 </div>
