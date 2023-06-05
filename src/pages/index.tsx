@@ -1,158 +1,157 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react'
 
 export default function Home() {
-    const [apiKey, setApiKey] = useState('');
-    const [repoUrl, setRepoUrl] = useState('');
-    const [fileTree, setFileTree] = useState([]);
-    const [mergedFiles, setMergedFiles] = useState('');
-    const [instruction, setInstruction] = useState('');
-    const [model, setModel] = useState('gpt-4');
-    const [temperature, setTemperature] = useState(0.1);
-    const [maxTokens, setMaxTokens] = useState(4000);
-    const [response, setResponse] = useState('');
-    const [models, setModels] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
-    const [selectedFiles, setSelectedFiles] = useState([]);
-    const [gitHubToken, setGitHubToken] = useState('');
-  
-    const displayFileTree = async (fileTree, indentLevel = 0) => {
-      for (const file of fileTree) {
-        if (file.type === 'dir') {
-          const response = await fetch(file.url);
-          const childFileTree = await response.json();
-          await displayFileTree(childFileTree, indentLevel + 1);
-        }
-      }
-      return fileTree;
-    }
-  
-    const handleSelectFile = (file, checked) => {
-      setSelectedFiles((prevFiles) => {
-        if (checked) {
-          // New file selected
-          return [...prevFiles, file];
-        } else {
-          // File unselected, remove it
-          return prevFiles.filter((f) => f !== file);
-        }
-      });
-    }
-  
-    const handleGetFileTree = async (e) => {
-      try {
-        e.preventDefault();
-        const repoPath = repoUrl.split('github.com/')[1];
-        const apiUrl = `https://api.github.com/repos/${repoPath}/contents`;
-        const headers = {} as any;
-        if (gitHubToken) {
-          headers.Authorization = `token ${gitHubToken}`;
-        }
-        const response = await fetch(apiUrl, { headers });
+  const [apiKey, setApiKey] = useState('')
+  const [repoUrl, setRepoUrl] = useState('')
+  const [fileTree, setFileTree] = useState([])
+  const [mergedFiles, setMergedFiles] = useState('')
+  const [instruction, setInstruction] = useState('')
+  const [model, setModel] = useState('gpt-4')
+  const [temperature, setTemperature] = useState(0.1)
+  const [maxTokens, setMaxTokens] = useState(4000)
+  const [response, setResponse] = useState('')
+  const [models, setModels] = useState([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [selectedFiles, setSelectedFiles] = useState([])
+  const [gitHubToken, setGitHubToken] = useState('')
 
-        const initialFileTree = await response.json();
-        const completeFileTree = await displayFileTree(initialFileTree);
-        setFileTree(completeFileTree);
-      } catch (error) {
-        console.error(error);
-        alert('Error getting file tree. Please check console.');
+  const displayFileTree = async (fileTree, indentLevel = 0) => {
+    for (const file of fileTree) {
+      if (file.type === 'dir') {
+        const response = await fetch(file.url)
+        const childFileTree = await response.json()
+        await displayFileTree(childFileTree, indentLevel + 1)
       }
     }
-    
-    
-  
-    const updateMergedFilesPreview = async () => {
-    const fileContents = await Promise.all(selectedFiles.map(async file => {
-      const headers = {} as any;
+    return fileTree
+  }
+
+  const handleSelectFile = (file, checked) => {
+    setSelectedFiles((prevFiles) => {
+      if (checked) {
+        // New file selected
+        return [...prevFiles, file]
+      } else {
+        // File unselected, remove it
+        return prevFiles.filter((f) => f !== file)
+      }
+    })
+  }
+
+  const handleGetFileTree = async (e) => {
+    try {
+      e.preventDefault()
+      const repoPath = repoUrl.split('github.com/')[1]
+      const apiUrl = `https://api.github.com/repos/${repoPath}/contents`
+      const headers = {} as any
       if (gitHubToken) {
-        headers.Authorization = `token ${gitHubToken}`;
+        headers.Authorization = `token ${gitHubToken}`
       }
-      const response = await fetch(file.download_url, { headers });
-      const content = await response.text();
-      return `######## ${file.name}\n${content}`;
-    }));
-      const mergedFiles = fileContents.join('\n');
-      setMergedFiles(mergedFiles);
-    }
-    
-    
+      const response = await fetch(apiUrl, { headers })
 
-    useEffect(() => {
-      // Call this function when selectedFiles state changes
-      updateMergedFilesPreview();
-    }, [selectedFiles]);
-  
-    const handleSendToOpenAI = async (e) => {
-      e.preventDefault();
-      if (!apiKey) {
-        alert('Please enter an API key.');
-        return;
-      }
-      const messages = mergedFiles.split('\n########').map(content => {
-        return { role: "user", content: '######## ' + content.trim() };
-      });
-      
-      messages.push({ role: "user", content: instruction });
-  
-      setIsLoading(true);
-  
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: model,
-          messages: messages,
-          temperature: Number(temperature),
-          max_tokens: Number(maxTokens),
-        }),
-      });
-  
-      const completion = await response.json();
-      setResponse(completion.choices[0].message.content);
-  
-      setIsLoading(false);
+      const initialFileTree = await response.json()
+      const completeFileTree = await displayFileTree(initialFileTree)
+      setFileTree(completeFileTree)
+    } catch (error) {
+      console.error(error)
+      alert('Error getting file tree. Please check console.')
     }
-  
-    const fetchModels = async () => {
-      if (!apiKey) {
-        return;
-      }
-  
-      const response = await fetch('https://api.openai.com/v1/models', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-        },
-      });
-  
-      const models = await response.json();
-      setModels(models.data);
+  }
+
+  const updateMergedFilesPreview = async () => {
+    const fileContents = await Promise.all(
+      selectedFiles.map(async (file) => {
+        const headers = {} as any
+        if (gitHubToken) {
+          headers.Authorization = `token ${gitHubToken}`
+        }
+        const response = await fetch(file.download_url, { headers })
+        const content = await response.text()
+        return `######## ${file.name}\n${content}`
+      })
+    )
+    const mergedFiles = fileContents.join('\n')
+    setMergedFiles(mergedFiles)
+  }
+
+  useEffect(() => {
+    // Call this function when selectedFiles state changes
+    updateMergedFilesPreview()
+  }, [selectedFiles])
+
+  const handleSendToOpenAI = async (e) => {
+    e.preventDefault()
+    if (!apiKey) {
+      alert('Please enter an API key.')
+      return
     }
-  
-    useEffect(() => {
-      // Fetch models on component mount
-      fetchModels();
-    }, []);
-  
-    useEffect(() => {
-      // Call this function when checkboxes state changes
-      updateMergedFilesPreview();
-    }, [fileTree]);
-  
+    const messages = mergedFiles.split('\n########').map((content) => {
+      return { role: 'user', content: '######## ' + content.trim() }
+    })
+
+    messages.push({ role: 'user', content: instruction })
+
+    setIsLoading(true)
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: model,
+        messages: messages,
+        temperature: Number(temperature),
+        max_tokens: Number(maxTokens)
+      })
+    })
+
+    const completion = await response.json()
+    setResponse(completion.choices[0].message.content)
+
+    setIsLoading(false)
+  }
+
+  const fetchModels = async () => {
+    if (!apiKey) {
+      return
+    }
+
+    const response = await fetch('https://api.openai.com/v1/models', {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${apiKey}`
+      }
+    })
+
+    const models = await response.json()
+    setModels(models.data)
+  }
+
+  useEffect(() => {
+    // Fetch models on component mount
+    fetchModels()
+  }, [])
+
+  useEffect(() => {
+    // Call this function when checkboxes state changes
+    updateMergedFilesPreview()
+  }, [fileTree])
 
   return (
     <div className="font-sans p-5 max-w-4xl mx-auto">
       <h1 className="font-bold text-2xl mb-5">RepoGPT</h1>
 
       <div className="flex items-center">
-        <input className="w-96 mr-2 py-2 border border-gray-300 rounded-md"
+        <input
+          className="w-96 mr-2 py-2 border border-gray-300 rounded-md"
           type="password"
           id="openai-key"
           name="openai-key"
           value={apiKey}
-          onChange={(e) => setApiKey(e.target.value)} />
+          onChange={(e) => setApiKey(e.target.value)}
+        />
         <button
           className="bg-indigo-500 text-white px-4 py-2 rounded"
           id="save-api-key"
@@ -162,36 +161,36 @@ export default function Home() {
         </button>
       </div>
       <div className="flex items-center">
-  <input className="w-96 mr-2 py-2 border border-gray-300 rounded-md"
-    type="password"
-    id="github-token"
-    name="github-token"
-    value={gitHubToken}
-    onChange={(e) => setGitHubToken(e.target.value)} />
-  <button
-    className="bg-indigo-500 text-white px-4 py-2 rounded"
-    id="save-github-token"
-    onClick={() => localStorage.setItem('github-token', gitHubToken)}
-  >
-    Save GitHub Token
-  </button>
-</div>
-
+        <input
+          className="w-96 mr-2 py-2 border border-gray-300 rounded-md"
+          type="password"
+          id="github-token"
+          name="github-token"
+          value={gitHubToken}
+          onChange={(e) => setGitHubToken(e.target.value)}
+        />
+        <button
+          className="bg-indigo-500 text-white px-4 py-2 rounded"
+          id="save-github-token"
+          onClick={() => localStorage.setItem('github-token', gitHubToken)}
+        >
+          Save GitHub Token
+        </button>
+      </div>
 
       <br />
 
       <form onSubmit={handleGetFileTree} className="flex items-center">
-        <input className="w-96 mr-2 py-2 border border-gray-300 rounded-md"
+        <input
+          className="w-96 mr-2 py-2 border border-gray-300 rounded-md"
           type="text"
           id="repo-url"
           name="repo-url"
           value={repoUrl}
           onChange={(e) => setRepoUrl(e.target.value)}
-          required />
-        <button
-          className="bg-indigo-500 text-white px-4 py-2 rounded"
-          type="submit"
-        >
+          required
+        />
+        <button className="bg-indigo-500 text-white px-4 py-2 rounded" type="submit">
           Get File Tree
         </button>
       </form>
@@ -200,22 +199,21 @@ export default function Home() {
 
       <div className="flex justify-between">
         <div>
-        <h2>Select Relevant Files:</h2>
-        <div id="file-tree">
-        {fileTree.map((file, index) => (
-          <div key={index} style={{marginLeft: `${file.indentLevel * 10}px`}}>
-            <label>
-              <input 
-                type="checkbox"
-                onChange={(e) => handleSelectFile(file, e.target.checked)}
-                checked={selectedFiles.includes(file)}
-              />
-              {file.name}
-            </label>
+          <h2>Select Relevant Files:</h2>
+          <div id="file-tree">
+            {fileTree.map((file, index) => (
+              <div key={index} style={{ marginLeft: `${file.indentLevel * 10}px` }}>
+                <label>
+                  <input
+                    type="checkbox"
+                    onChange={(e) => handleSelectFile(file, e.target.checked)}
+                    checked={selectedFiles.includes(file)}
+                  />
+                  {file.name}
+                </label>
+              </div>
+            ))}
           </div>
-        ))}
-        </div>
-
         </div>
         <div>
           <h2>Merged Files Preview:</h2>
@@ -314,5 +312,5 @@ export default function Home() {
         onChange={(e) => setResponse(e.target.value)}
       ></textarea>
     </div>
-  );
+  )
 }
