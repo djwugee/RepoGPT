@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { twMerge } from 'tailwind-merge'
 
 export default function Home() {
   const [apiKey, setApiKey] = useState('')
@@ -203,212 +204,206 @@ export default function Home() {
   }, [fileTree])
 
   return (
-    <div className="font-sans p-5 max-w-4xl mx-auto">
-      <h1 className="font-bold text-2xl mb-5">🗃️ RepoGPT</h1>
+    <div className="bg-background text-secondary">
+      <div className="bg-surface font-sans p-5 max-w-4xl mx-auto shadow-l-lg">
+        <h1 className="font-bold text-2xl mb-5 text-primary">🗃️ RepoGPT</h1>
 
-      <p>Merge files from a Github repository to send them to OpenAI API with a prompt.</p>
-      <p className="text-sm">
-        Tip: if you have ChatGPT Plus, copy/paste the preview in the{' '}
-        <span className="underline">
-          <a href="https://chatgpt.com">chat</a>
-        </span>{' '}
-        to save API costs
-      </p>
+        <p>Merge files from a Github repository to send them to OpenAI API with a prompt.</p>
+        <p className="text-sm">
+          Tip: if you have ChatGPT Plus, copy/paste the preview in the{' '}
+          <span className="text-accent">
+            <a href="https://chatgpt.com">chat</a>
+          </span>{' '}
+          to save API costs
+        </p>
 
-      <br />
+        <br />
 
-      <div className="flex-col space-y-4">
-        {[
-          {
-            storageKey: 'openai-api-key',
-            label: 'OpenAI API Key',
-            value: apiKey,
-            setValue: setApiKey,
-            link: 'https://platform.openai.com/account/api-keys'
-          },
-          {
-            storageKey: 'github-token',
-            label: 'GitHub Token',
-            optional: true,
-            value: gitHubToken,
-            setValue: setGitHubToken,
-            link: 'https://github.com/settings/tokens'
-          }
-        ].map((field) => (
+        <div className="flex-col space-y-4">
+          {[
+            {
+              storageKey: 'openai-api-key',
+              label: 'OpenAI API Key',
+              value: apiKey,
+              setValue: setApiKey,
+              link: 'https://platform.openai.com/account/api-keys'
+            },
+            {
+              storageKey: 'github-token',
+              label: 'GitHub Token',
+              optional: true,
+              value: gitHubToken,
+              setValue: setGitHubToken,
+              link: 'https://github.com/settings/tokens'
+            }
+          ].map((field) => (
+            <div key={field.storageKey}>
+              <div className="flex items-center">
+                <input
+                  className="w-96 text-field"
+                  type="password"
+                  id={field.storageKey}
+                  name={field.storageKey}
+                  value={field.value}
+                  onChange={(e) => field.setValue(e.target.value)}
+                />
+                <button
+                  id={`save-${field.storageKey}`}
+                  onClick={() => localStorage.setItem(field.storageKey, field.value)}
+                >
+                  Save {`${field.label}${field.optional ? '' : '*'}`}
+                </button>
+              </div>
+              <div className="text-sm">
+                {field.label === 'GitHub Token' && (
+                  <p>GitHub Token is optional, needed only for a higher rate limit and private repo access.</p>
+                )}
+                {field.link && (
+                  <p>
+                    <span className="text-accent">
+                      <a href={field.link}>Click here</a>
+                    </span>{' '}
+                    to generate {field.label.toLowerCase()}
+                  </p>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <br />
+
+        <form onSubmit={handleGetFileTree} className="flex items-center">
+          <input
+            className="w-96"
+            type="text"
+            id="repo-url"
+            name="repo-url"
+            value={repoUrl}
+            onChange={(e) => setRepoUrl(e.target.value)}
+            required
+          />
+          <button className="" type="submit">
+            Get File Tree
+          </button>
+        </form>
+        {githubError && <div className="text-error">{githubError}</div>}
+
+        <br />
+
+        <div className="flex justify-between">
           <div>
-            <div key={field.storageKey} className="flex items-center">
-              <input
-                className="w-96 mr-2 py-2 border border-gray-300 rounded-md"
-                type="password"
-                id={field.storageKey}
-                name={field.storageKey}
-                value={field.value}
-                onChange={(e) => field.setValue(e.target.value)}
-              />
-              <button
-                className="bg-indigo-500 text-white px-4 py-2 rounded"
-                id={`save-${field.storageKey}`}
-                onClick={() => localStorage.setItem(field.storageKey, field.value)}
-              >
-                Save {`${field.label}${field.optional ? '' : '*'}`}
+            <h2>Select Relevant Files:</h2>
+            <div id="file-tree">
+              {fileTree.map((file, index) => (
+                <div key={index} style={{ marginLeft: `${file.indentLevel * 10}px` }}>
+                  <label className={selectedFiles.includes(file) ? 'text-primary' : ''}>
+                    <input
+                      className="mr-2"
+                      type="checkbox"
+                      disabled={file.type === 'dir'}
+                      onChange={(e) => handleSelectFile(file, e.target.checked)}
+                      checked={selectedFiles.includes(file)}
+                    />
+                    {file.name}
+                  </label>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div>
+            <div className="flex space-x-2 mb-2">
+              <h2>Merged Files Preview:</h2>
+              <button onClick={handleCopyToClipboard} className="text-xs px-1 py-0">
+                {showCopyConfirmation ? 'Copied!' : 'Copy'}
               </button>
             </div>
-            <div className="text-sm ">
-              {field.label === 'GitHub Token' && (
-                <p>GitHub Token is optional, needed only for a higher rate limit and private repo access.</p>
-              )}
-              {field.link && (
-                <p className="underline">
-                  <a href={field.link}>Click here to generate {field.label.toLowerCase()}</a>
-                </p>
-              )}
-            </div>
+            <textarea
+              className="w-full"
+              id="output"
+              rows={20}
+              cols={80}
+              readOnly
+              value={mergedFiles}
+              onChange={(e) => setMergedFiles(e.target.value)}
+            ></textarea>
           </div>
-        ))}
-      </div>
+        </div>
 
-      <br />
+        <br />
+        <br />
 
-      <form onSubmit={handleGetFileTree} className="flex items-center">
-        <input
-          className="w-96 mr-2 py-2 border border-gray-300 rounded-md"
-          type="text"
-          id="repo-url"
-          name="repo-url"
-          value={repoUrl}
-          onChange={(e) => setRepoUrl(e.target.value)}
+        <h2>Instruction:</h2>
+        <textarea
+          className="w-full"
+          id="instruction"
+          name="instruction"
+          rows={20}
+          cols={80}
+          placeholder="rewrite this entire application"
           required
-        />
-        <button className="bg-indigo-500 text-white px-4 py-2 rounded" type="submit">
-          Get File Tree
+          value={instruction}
+          onChange={(e) => setInstruction(e.target.value)}
+        ></textarea>
+
+        <br />
+
+        <div className="flex items-center justify-between">
+          <div>
+            <label htmlFor="models">Select Model:</label>
+            <select className="w-60" id="models" name="models" value={model} onChange={(e) => setModel(e.target.value)}>
+              <option>gpt-4</option>
+              <option>gpt-3.5-turbo</option>
+            </select>
+          </div>
+
+          <div>
+            <label htmlFor="temperature">Temperature:</label>
+            <input
+              className="w-60 py-2 px-3"
+              type="number"
+              id="temperature"
+              name="temperature"
+              min="0"
+              max="1"
+              step="0.01"
+              value={temperature}
+              onChange={(e) => setTemperature(Number(e.target.value))}
+            />
+          </div>
+
+          <div>
+            <label htmlFor="max-tokens">Max Tokens:</label>
+            <input
+              className="w-60"
+              type="number"
+              id="max-tokens"
+              name="max-tokens"
+              min="1"
+              value={maxTokens}
+              onChange={(e) => setMaxTokens(Number(e.target.value))}
+            />
+          </div>
+        </div>
+
+        <button className="my-4" id="send-to-openai" onClick={handleSendToOpenAI}>
+          Send to OpenAI
         </button>
-      </form>
-      {githubError && <div className="text-red-500">{githubError}</div>}
+        {openAIError && <div className="text-error">{openAIError}</div>}
 
-      <br />
+        <br />
 
-      <div className="flex justify-between">
-        <div>
-          <h2>Select Relevant Files:</h2>
-          <div id="file-tree">
-            {fileTree.map((file, index) => (
-              <div key={index} style={{ marginLeft: `${file.indentLevel * 10}px` }}>
-                <label>
-                  <input
-                    className="mr-1"
-                    type="checkbox"
-                    disabled={file.type === 'dir'}
-                    onChange={(e) => handleSelectFile(file, e.target.checked)}
-                    checked={selectedFiles.includes(file)}
-                  />
-                  {file.name}
-                </label>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div>
-          <div className="flex space-x-2 mb-2">
-            <h2>Merged Files Preview:</h2>
-            <button onClick={handleCopyToClipboard} className="text-xs bg-indigo-500 text-white px-1 py-1 rounded">
-              {showCopyConfirmation ? 'Copied!' : 'Copy'}
-            </button>
-          </div>
-          <textarea
-            className="w-full py-2 px-3 border border-gray-300 rounded-md"
-            id="output"
-            rows={20}
-            cols={80}
-            readOnly
-            value={mergedFiles}
-            onChange={(e) => setMergedFiles(e.target.value)}
-          ></textarea>
-        </div>
+        <h2>OpenAI Response:</h2>
+        <textarea
+          className="w-full"
+          id="openai-response"
+          rows={20}
+          cols={80}
+          readOnly
+          value={response}
+          onChange={(e) => setResponse(e.target.value)}
+        ></textarea>
       </div>
-
-      <br />
-      <br />
-
-      <h2>Instruction:</h2>
-      <textarea
-        className="w-full py-2 px-3 border border-gray-300 rounded-md"
-        id="instruction"
-        name="instruction"
-        rows={20}
-        cols={80}
-        placeholder="rewrite this entire application"
-        required
-        value={instruction}
-        onChange={(e) => setInstruction(e.target.value)}
-      ></textarea>
-
-      <br />
-
-      <div className="flex items-center justify-between">
-        <div>
-          <label htmlFor="models">Select Model:</label>
-          <select
-            className="w-60 py-2 px-3 border border-gray-300 rounded-md"
-            id="models"
-            name="models"
-            value={model}
-            onChange={(e) => setModel(e.target.value)}
-          >
-            <option>gpt-4</option>
-            <option>gpt-3.5-turbo</option>
-          </select>
-        </div>
-
-        <div>
-          <label htmlFor="temperature">Temperature:</label>
-          <input
-            className="w-60 py-2 px-3 border border-gray-300 rounded-md"
-            type="number"
-            id="temperature"
-            name="temperature"
-            min="0"
-            max="1"
-            step="0.01"
-            value={temperature}
-            onChange={(e) => setTemperature(Number(e.target.value))}
-          />
-        </div>
-
-        <div>
-          <label htmlFor="max-tokens">Max Tokens:</label>
-          <input
-            className="w-60 py-2 px-3 border border-gray-300 rounded-md"
-            type="number"
-            id="max-tokens"
-            name="max-tokens"
-            min="1"
-            value={maxTokens}
-            onChange={(e) => setMaxTokens(Number(e.target.value))}
-          />
-        </div>
-      </div>
-
-      <button
-        className="bg-indigo-500 text-white px-4 py-2 rounded my-4"
-        id="send-to-openai"
-        onClick={handleSendToOpenAI}
-      >
-        Send to OpenAI
-      </button>
-      {openAIError && <div className="text-red-500">{openAIError}</div>}
-
-      <br />
-
-      <h2>OpenAI Response:</h2>
-      <textarea
-        className="w-full py-2 px-3 border border-gray-300 rounded-md"
-        id="openai-response"
-        rows={20}
-        cols={80}
-        readOnly
-        value={response}
-        onChange={(e) => setResponse(e.target.value)}
-      ></textarea>
     </div>
   )
 }

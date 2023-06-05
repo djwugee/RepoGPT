@@ -5,9 +5,19 @@
 
 @import 'tailwindcss/utilities';
 
-/* Add a default padding to all inputs */
-@layer utilities {
-  input {
-    @apply p-2;
+@layer base {
+  textarea,
+  input,
+  select {
+    @apply p-2 mr-2 border border-accent rounded-md bg-background text-tertiary;
+  }
+
+  input[type='checkbox'] {
+    @apply accent-accent text-background;
+  }
+
+  button,
+  button[type='submit'] {
+    @apply text-accent hover:text-background hover:bg-accent border border-accent hover:border-accent px-4 py-2 rounded transition-colors duration-150 ease-in-out;
   }
 }
