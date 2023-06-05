@@ -10,7 +10,9 @@ export default function Home() {
   const [repoUrl, setRepoUrl] = useState('')
   const [fileTree, setFileTree] = useState([])
   const [mergedFiles, setMergedFiles] = useState('')
-  const [instruction, setInstruction] = useState('')
+  const [instruction, setInstruction] = useState(
+    'Using Clean Code, refactor the following code to make it more readable.'
+  )
   const [model, setModel] = useState('gpt-4')
   const [temperature, setTemperature] = useState(0.1)
   const [maxTokens, setMaxTokens] = useState(4000)
