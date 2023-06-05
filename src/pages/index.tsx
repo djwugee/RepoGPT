@@ -342,7 +342,7 @@ export default function Home() {
               </button>
             </div>
             <textarea
-              className="w-full"
+              className="w-full h-full text-xs"
               id="output"
               rows={20}
               cols={80}
