@@ -1,6 +1,9 @@
-# 🗃️ RepoGPT (based on RefactorGPT)
+# 🗃️ RepoGPT
 
-This project is a web application that allows users to extract and manipulate GitHub repository files. It makes use of OpenAI's GPT-4 to generate a refactorization based on the provided instructions. The user selects the necessary files, which are merged and sent to the AI for processing.
+Merge files from a Github repository to send them to OpenAI API with a prompt.
 
-Link: soon
-Demo gif: soon
+Tip: if you have ChatGPT Plus, copy/paste the preview in the chat to save API costs
+
+http://repogpt.markkop.dev/
+
+![Demo](/public/demo.jpeg)
