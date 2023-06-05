@@ -13,6 +13,7 @@ export default function Home() {
     const [models, setModels] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [selectedFiles, setSelectedFiles] = useState([]);
+    const [gitHubToken, setGitHubToken] = useState('');
   
     const displayFileTree = async (fileTree, indentLevel = 0) => {
       for (const file of fileTree) {
@@ -42,27 +43,37 @@ export default function Home() {
         e.preventDefault();
         const repoPath = repoUrl.split('github.com/')[1];
         const apiUrl = `https://api.github.com/repos/${repoPath}/contents`;
-        const response = await fetch(apiUrl);
+        const headers = {} as any;
+        if (gitHubToken) {
+          headers.Authorization = `token ${gitHubToken}`;
+        }
+        const response = await fetch(apiUrl, { headers });
+
         const initialFileTree = await response.json();
         const completeFileTree = await displayFileTree(initialFileTree);
         setFileTree(completeFileTree);
       } catch (error) {
         console.error(error);
         alert('Error getting file tree. Please check console.');
-
       }
     }
     
+    
   
     const updateMergedFilesPreview = async () => {
-      const fileContents = await Promise.all(selectedFiles.map(async file => {
-        const response = await fetch(file.download_url);
-        const content = await response.text();
-        return `######## ${file.name}\n${content}`;
-      }));
+    const fileContents = await Promise.all(selectedFiles.map(async file => {
+      const headers = {} as any;
+      if (gitHubToken) {
+        headers.Authorization = `token ${gitHubToken}`;
+      }
+      const response = await fetch(file.download_url, { headers });
+      const content = await response.text();
+      return `######## ${file.name}\n${content}`;
+    }));
       const mergedFiles = fileContents.join('\n');
       setMergedFiles(mergedFiles);
     }
+    
     
 
     useEffect(() => {
@@ -150,6 +161,22 @@ export default function Home() {
           Save Key
         </button>
       </div>
+      <div className="flex items-center">
+  <input className="w-96 mr-2 py-2 border border-gray-300 rounded-md"
+    type="password"
+    id="github-token"
+    name="github-token"
+    value={gitHubToken}
+    onChange={(e) => setGitHubToken(e.target.value)} />
+  <button
+    className="bg-indigo-500 text-white px-4 py-2 rounded"
+    id="save-github-token"
+    onClick={() => localStorage.setItem('github-token', gitHubToken)}
+  >
+    Save GitHub Token
+  </button>
+</div>
+
 
       <br />
 
