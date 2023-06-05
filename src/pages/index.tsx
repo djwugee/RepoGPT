@@ -297,7 +297,13 @@ export default function Home() {
             <div id="file-tree">
               {fileTree.map((file, index) => (
                 <div key={index} style={{ marginLeft: `${file.indentLevel * 10}px` }}>
-                  <label className={selectedFiles.includes(file) ? 'text-primary' : ''}>
+                  <label
+                    className={twMerge(
+                      'text-secondary opacity-70',
+                      selectedFiles.includes(file) && 'text-primary opacity-100',
+                      file.type === 'dir' && 'opacity-20'
+                    )}
+                  >
                     <input
                       className="mr-2"
                       type="checkbox"
