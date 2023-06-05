@@ -15,6 +15,20 @@ export default function Home() {
   const [selectedFiles, setSelectedFiles] = useState([])
   const [gitHubToken, setGitHubToken] = useState('')
 
+  function retrieveValueFromLocalStorage(key, setter, defaultValue) {
+    const savedValue = localStorage.getItem(key)
+    if (savedValue) {
+      setter(savedValue)
+    } else if (defaultValue) {
+      setter(defaultValue)
+    }
+  }
+  useEffect(() => {
+    retrieveValueFromLocalStorage('openai-api-key', setApiKey, '')
+    retrieveValueFromLocalStorage('github-token', setGitHubToken, '')
+    retrieveValueFromLocalStorage('github-repo-url', setRepoUrl, 'https://github.com/Markkop/RepoGPT')
+  }, [])
+
   const displayFileTree = async (fileTree, indentLevel = 0) => {
     let allFiles = []
     for (const file of fileTree) {
@@ -50,6 +64,7 @@ export default function Home() {
   const handleGetFileTree = async (e) => {
     try {
       e.preventDefault()
+      localStorage.setItem('github-repo-url', repoUrl)
       const repoPath = repoUrl.split('github.com/')[1]
       const apiUrl = `https://api.github.com/repos/${repoPath}/contents`
       const headers = {} as any
