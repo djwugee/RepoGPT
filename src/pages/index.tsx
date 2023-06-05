@@ -94,13 +94,24 @@ export default function Home() {
   const updateMergedFilesPreview = async () => {
     const fileContents = await Promise.all(
       selectedFiles.map(async (file) => {
-        const headers = {} as any
-        if (gitHubToken) {
-          headers.Authorization = `token ${gitHubToken}`
+        try {
+          const headers = {} as any
+          if (gitHubToken) {
+            headers.Authorization = `token ${gitHubToken}`
+          }
+          const response = await fetch(file.download_url)
+
+          if (!response.ok) {
+            throw new Error(response.statusText)
+          }
+
+          const content = await response.text()
+          return `######## ${file.name}\n${content}`
+        } catch (error) {
+          console.error(error)
+          setGithubError(error.message)
+          return `######## ${file.name}\n${error.message}`
         }
-        const response = await fetch(file.download_url, { headers })
-        const content = await response.text()
-        return `######## ${file.name}\n${content}`
       })
     )
     const mergedFiles = fileContents.join('\n')
@@ -261,6 +272,7 @@ export default function Home() {
                 <label>
                   <input
                     type="checkbox"
+                    disabled={file.type === 'dir'}
                     onChange={(e) => handleSelectFile(file, e.target.checked)}
                     checked={selectedFiles.includes(file)}
                   />
