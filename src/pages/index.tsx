@@ -368,42 +368,66 @@ export default function Home() {
 
         <br />
 
-        <div className="flex items-center justify-between">
-          <div>
-            <label htmlFor="models">Model</label>
-            <select className="w-60" id="models" name="models" value={model} onChange={(e) => setModel(e.target.value)}>
-              <option>gpt-4</option>
-              <option>gpt-3.5-turbo</option>
-            </select>
-          </div>
-
-          <div>
-            <label htmlFor="temperature">Temperature</label>
-            <input
-              className="w-60 py-2 px-3"
-              type="number"
-              id="temperature"
-              name="temperature"
-              min="0"
-              max="1"
-              step="0.01"
-              value={temperature}
-              onChange={(e) => setTemperature(Number(e.target.value))}
-            />
-          </div>
-
-          <div>
-            <label htmlFor="max-tokens">Max Tokens</label>
-            <input
-              className="w-60"
-              type="number"
-              id="max-tokens"
-              name="max-tokens"
-              min="1"
-              value={maxTokens}
-              onChange={(e) => setMaxTokens(Number(e.target.value))}
-            />
-          </div>
+        <div className="flex flex-col lg:flex-row items-left gap-2">
+          {[
+            {
+              label: 'Model',
+              id: 'models',
+              value: model,
+              onChange: (e) => setModel(e.target.value),
+              options: [{ name: 'gpt-4' }, { name: 'gpt-3.5-turbo' }]
+            },
+            {
+              label: 'Temperature',
+              id: 'temperature',
+              type: 'number',
+              min: 0,
+              max: 1,
+              step: '0.1',
+              value: temperature,
+              onChange: (e) => setTemperature(Number(e.target.value))
+            },
+            {
+              label: 'Max Tokens',
+              id: 'max-tokens',
+              type: 'number',
+              min: 1,
+              step: '100',
+              value: maxTokens,
+              onChange: (e) => setMaxTokens(Number(e.target.value))
+            }
+          ].map((input, index) => (
+            <div key={index} className="flex gap-2 justify-start lg:w-full">
+              <label htmlFor={input.id} className="my-auto w-24 lg:w-auto whitespace-nowrap">
+                {input.label}
+              </label>
+              {input.id === 'models' ? (
+                <select
+                  className="flex-grow"
+                  id={input.id}
+                  name={input.id}
+                  value={input.value}
+                  onChange={input.onChange}
+                >
+                  {input.options.map((option, i) => (
+                    <option key={i}>{option.name}</option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  className="flex-grow py-2 px-3"
+                  type={input.type}
+                  id={input.id}
+                  name={input.id}
+                  min={input.min}
+                  max={input.max}
+                  step={input.step}
+                  value={input.value}
+                  onChange={input.onChange}
+                />
+              )}
+            </div>
+          ))}
         </div>
 
         <button className="my-4" id="send-to-openai" onClick={handleSendToOpenAI}>
