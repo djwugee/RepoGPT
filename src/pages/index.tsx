@@ -14,6 +14,8 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false)
   const [selectedFiles, setSelectedFiles] = useState([])
   const [gitHubToken, setGitHubToken] = useState('')
+  const [githubError, setGithubError] = useState(null)
+  const [openAIError, setOpenAIError] = useState(null)
 
   function retrieveValueFromLocalStorage(key, setter, defaultValue) {
     const savedValue = localStorage.getItem(key)
@@ -64,6 +66,7 @@ export default function Home() {
   const handleGetFileTree = async (e) => {
     try {
       e.preventDefault()
+      setGithubError(null)
       localStorage.setItem('github-repo-url', repoUrl)
       const repoPath = repoUrl.split('github.com/')[1]
       const apiUrl = `https://api.github.com/repos/${repoPath}/contents`
@@ -73,13 +76,18 @@ export default function Home() {
       }
       const response = await fetch(apiUrl, { headers })
 
-      const initialFileTree = await response.json()
-      const completeFileTree = await displayFileTree(initialFileTree)
+      const json = await response.json()
+
+      if (json.message) {
+        throw new Error(json.message)
+      }
+
+      const completeFileTree = await displayFileTree(json)
       setFileTree(completeFileTree)
       setSelectedFiles([]) // Clear selected files when fetching a new file tree
     } catch (error) {
       console.error(error)
-      alert('Error getting file tree. Please check console.')
+      setGithubError(error.message)
     }
   }
 
@@ -105,37 +113,43 @@ export default function Home() {
   }, [selectedFiles])
 
   const handleSendToOpenAI = async (e) => {
-    e.preventDefault()
-    if (!apiKey) {
-      alert('Please enter an API key.')
-      return
-    }
-    const messages = mergedFiles.split('\n########').map((content) => {
-      return { role: 'user', content: '######## ' + content.trim() }
-    })
-
-    messages.push({ role: 'user', content: instruction })
-
-    setIsLoading(true)
-
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`
-      },
-      body: JSON.stringify({
-        model: model,
-        messages: messages,
-        temperature: Number(temperature),
-        max_tokens: Number(maxTokens)
+    try {
+      e.preventDefault()
+      setOpenAIError(null)
+      if (!apiKey) {
+        setOpenAIError('Please enter an OpenAI API key')
+        return
+      }
+      const messages = mergedFiles.split('\n########').map((content) => {
+        return { role: 'user', content: '######## ' + content.trim() }
       })
-    })
 
-    const completion = await response.json()
-    setResponse(completion.choices[0].message.content)
+      messages.push({ role: 'user', content: instruction })
 
-    setIsLoading(false)
+      setIsLoading(true)
+
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: model,
+          messages: messages,
+          temperature: Number(temperature),
+          max_tokens: Number(maxTokens)
+        })
+      })
+
+      const completion = await response.json()
+      setResponse(completion.choices[0].message.content)
+
+      setIsLoading(false)
+    } catch (error) {
+      console.error(error)
+      setOpenAIError(error.message)
+    }
   }
 
   const fetchModels = async () => {
@@ -234,6 +248,7 @@ export default function Home() {
           Get File Tree
         </button>
       </form>
+      {githubError && <div className="text-red-500">{githubError}</div>}
 
       <br />
 
@@ -338,6 +353,7 @@ export default function Home() {
       >
         Send to OpenAI
       </button>
+      {openAIError && <div className="text-red-500">{openAIError}</div>}
 
       <br />
 
