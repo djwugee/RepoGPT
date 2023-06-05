@@ -122,12 +122,14 @@ export default function Home() {
       selectedFiles.map(async (file) => {
         try {
           const headers = {} as any
+          let response
           if (gitHubToken) {
             headers.Authorization = `token ${gitHubToken}`
             headers.Accept = 'application/vnd.github.v3.raw'
+            response = await fetch(file.url, { headers })
+          } else {
+            response = await fetch(file.download_url)
           }
-
-          const response = await fetch(file.download_url, { headers })
 
           if (!response.ok) {
             throw new Error(response.statusText)
