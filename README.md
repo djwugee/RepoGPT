@@ -6,7 +6,7 @@ Tip: if you have ChatGPT Plus, copy/paste the preview in the chat to save API co
 
 http://repogpt.markkop.dev/
 
-![Demo](/public/demo.png)
+![Demo](/public/og.png)
 
 ---
 
