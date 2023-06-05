@@ -220,10 +220,10 @@ export default function Home() {
         <h1 className="font-bold text-2xl mb-5 text-primary">🗃️ RepoGPT</h1>
 
         <p>Merge files from a Github repository to send them to OpenAI API with a prompt.</p>
-        <p className="text-sm">
-          Tip: if you have ChatGPT Plus, copy/paste the preview in the{' '}
-          <span className="text-accent">
-            <a href="https://chatgpt.com">chat</a>
+        <p className="text-sm opacity-70">
+          Or copy/paste them into chatbots like{' '}
+          <span className="text-accent hover:underline">
+            <a href="https://chatgpt.com">ChatGPT</a>
           </span>{' '}
           to save API costs
         </p>
