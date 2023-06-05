@@ -4,6 +4,7 @@ import { ExternalLinkIcon } from '../components/ExternalLinkIcon'
 import { GhRibbon } from '../components/GhRibbon'
 import { EyeSlashIcon } from '../components/EyeSlashIcon'
 import { EyeIcon } from '../components/EyeIcon'
+import { handleCopyToClipboard } from '../utils'
 
 export default function Home() {
   const [apiKey, setApiKey] = useState('')
@@ -26,18 +27,6 @@ export default function Home() {
   const [showCopyConfirmation, setShowCopyConfirmation] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showGithubToken, setShowGithubToken] = useState(false)
-
-  const handleCopyToClipboard = async () => {
-    try {
-      await navigator.clipboard.writeText(mergedFiles)
-      setShowCopyConfirmation(true)
-      setTimeout(() => {
-        setShowCopyConfirmation(false)
-      }, 2000)
-    } catch (err) {
-      console.error(`Could not copy text: ${err}`)
-    }
-  }
 
   function retrieveValueFromLocalStorage(key, setter, defaultValue) {
     const savedValue = localStorage.getItem(key)
@@ -348,7 +337,10 @@ export default function Home() {
           <div className="flex-grow">
             <div className="flex space-x-2 mb-2">
               <h2>Merged Files</h2>
-              <button onClick={handleCopyToClipboard} className="text-xs px-1 py-0">
+              <button
+                onClick={() => handleCopyToClipboard(mergedFiles, setShowCopyConfirmation, navigator.clipboard)}
+                className="text-xs px-1 py-0"
+              >
                 {showCopyConfirmation ? 'Copied!' : 'Copy'}
               </button>
             </div>
