@@ -21,3 +21,31 @@
     @apply text-accent hover:text-background hover:bg-accent border border-accent hover:border-accent px-4 py-2 rounded transition-colors duration-150 ease-in-out;
   }
 }
+
+.animate-ribbon:hover .octo-arm {
+  animation: octocat-wave 560ms ease-in-out;
+}
+
+@keyframes octocat-wave {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  20%,
+  60% {
+    transform: rotate(-25deg);
+  }
+  40%,
+  80% {
+    transform: rotate(10deg);
+  }
+}
+
+@media (max-width: 500px) {
+  .animate-ribbon:hover .octo-arm {
+    animation: none;
+  }
+  .animate-ribbon .octo-arm {
+    animation: octocat-wave 560ms ease-in-out;
+  }
+}

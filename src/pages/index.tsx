@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { twMerge } from 'tailwind-merge'
 import { ExternalLinkIcon } from '../components/ExternalLinkIcon'
+import { GhRibbon } from '../components/GhRibbon'
 
 export default function Home() {
   const [apiKey, setApiKey] = useState('')
@@ -205,8 +206,9 @@ export default function Home() {
   }, [fileTree])
 
   return (
-    <div className="bg-background text-secondary">
-      <div className="bg-surface font-sans p-5 max-w-4xl mx-auto shadow-l-lg">
+    <main className="bg-background text-secondary">
+      <div className="bg-surface font-sans px-5 max-w-4xl mx-auto shadow-l-lg relative">
+        <GhRibbon className="" />
         <h1 className="font-bold text-2xl mb-5 text-primary">🗃️ RepoGPT</h1>
 
         <p>Merge files from a Github repository to send them to OpenAI API with a prompt.</p>
@@ -405,6 +407,6 @@ export default function Home() {
           onChange={(e) => setResponse(e.target.value)}
         ></textarea>
       </div>
-    </div>
+    </main>
   )
 }
