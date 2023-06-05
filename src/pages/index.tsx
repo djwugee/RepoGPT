@@ -178,7 +178,7 @@ export default function Home() {
 
   return (
     <main className="bg-background text-secondary">
-      <div className="bg-surface font-sans px-5 max-w-4xl mx-auto shadow-l-lg relative">
+      <div className="bg-surface font-sans px-5 max-w-5xl mx-auto shadow-l-lg relative">
         <GhRibbon />
         <h1 className="font-bold text-2xl mb-5 text-primary">🗃️ RepoGPT</h1>
 

@@ -17,7 +17,7 @@ require('dotenv').config()
 
         // set the viewport size
         await page.setViewport({
-          width: 1200,
+          width: 1024,
           height: 630,
           deviceScaleFactor: 1
         })
@@ -39,9 +39,9 @@ require('dotenv').config()
         // wait
         await page.waitForSelector('input[type="checkbox"]')
 
-        // click on the 6th checkbox
+        // click on checkbox
         const checkboxes = await page.$$('input[type="checkbox"]')
-        await checkboxes[5].click()
+        await checkboxes[6].click()
 
         // wait
         await page.waitForNetworkIdle()
