@@ -5,10 +5,13 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "og": "node ./src/scripts/screenshot.js http://localhost:3001"
   },
   "dependencies": {
+    "dotenv": "^16.1.4",
     "next": "13.1.2",
+    "puppeteer": "^20.5.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "tailwind-merge": "^1.13.0"
