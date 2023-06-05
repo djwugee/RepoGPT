@@ -61,6 +61,7 @@ export default function Home() {
       const initialFileTree = await response.json()
       const completeFileTree = await displayFileTree(initialFileTree)
       setFileTree(completeFileTree)
+      setSelectedFiles([]) // Clear selected files when fetching a new file tree
     } catch (error) {
       console.error(error)
       alert('Error getting file tree. Please check console.')
