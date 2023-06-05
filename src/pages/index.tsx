@@ -286,9 +286,9 @@ export default function Home() {
 
         <br />
 
-        <div className="flex justify-between">
+        <div className="flex flex-col lg:flex-row flex-wrap lg:flex-nowrap justify-between gap-2">
           <div>
-            <h2>Select Relevant Files:</h2>
+            <h2>Select Files</h2>
             <div id="file-tree">
               {fileTree.map((file, index) => (
                 <div key={index} style={{ marginLeft: `${file.indentLevel * 10}px` }}>
@@ -314,7 +314,7 @@ export default function Home() {
           </div>
           <div>
             <div className="flex space-x-2 mb-2">
-              <h2>Merged Files Preview:</h2>
+              <h2>Merged Files</h2>
               <button onClick={handleCopyToClipboard} className="text-xs px-1 py-0">
                 {showCopyConfirmation ? 'Copied!' : 'Copy'}
               </button>
@@ -334,7 +334,7 @@ export default function Home() {
         <br />
         <br />
 
-        <h2>Instruction:</h2>
+        <h2>Prompt</h2>
         <textarea
           className="w-full"
           id="instruction"
@@ -351,7 +351,7 @@ export default function Home() {
 
         <div className="flex items-center justify-between">
           <div>
-            <label htmlFor="models">Select Model:</label>
+            <label htmlFor="models">Model</label>
             <select className="w-60" id="models" name="models" value={model} onChange={(e) => setModel(e.target.value)}>
               <option>gpt-4</option>
               <option>gpt-3.5-turbo</option>
@@ -359,7 +359,7 @@ export default function Home() {
           </div>
 
           <div>
-            <label htmlFor="temperature">Temperature:</label>
+            <label htmlFor="temperature">Temperature</label>
             <input
               className="w-60 py-2 px-3"
               type="number"
@@ -374,7 +374,7 @@ export default function Home() {
           </div>
 
           <div>
-            <label htmlFor="max-tokens">Max Tokens:</label>
+            <label htmlFor="max-tokens">Max Tokens</label>
             <input
               className="w-60"
               type="number"
@@ -394,7 +394,7 @@ export default function Home() {
 
         <br />
 
-        <h2>OpenAI Response:</h2>
+        <h2>OpenAI Response</h2>
         <textarea
           className="w-full"
           id="openai-response"
