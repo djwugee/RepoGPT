@@ -308,7 +308,7 @@ export default function Home() {
         <div className="flex flex-col lg:flex-row flex-wrap lg:flex-nowrap justify-between gap-2">
           <div>
             <h2>Select Files</h2>
-            <div id="file-tree">
+            <div id="file-tree" className="text-sm">
               {fileTree.map((file, index) => (
                 <div key={index} style={{ marginLeft: `${file.indentLevel * 10}px` }}>
                   <label
