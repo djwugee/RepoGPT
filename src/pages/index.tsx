@@ -19,8 +19,7 @@ export default function Home() {
   const [temperature, setTemperature] = useState(0.1)
   const [maxTokens, setMaxTokens] = useState(4000)
   const [response, setResponse] = useState('')
-  const [models, setModels] = useState([])
-  const [isLoading, setIsLoading] = useState(false)
+  const [models, setModels] = useState([{ name: 'gpt-4' }, { name: 'gpt-3.5-turbo' }])
   const [selectedFiles, setSelectedFiles] = useState([])
   const [gitHubToken, setGitHubToken] = useState('')
   const [githubError, setGithubError] = useState(null)
@@ -140,8 +139,6 @@ export default function Home() {
 
       messages.push({ role: 'user', content: instruction })
 
-      setIsLoading(true)
-
       const completion = await openAIRequest('POST', '/chat/completions', openAIApiKey, {
         model: model,
         messages: messages,
@@ -150,8 +147,6 @@ export default function Home() {
       })
 
       setResponse(completion.choices[0].message.content)
-
-      setIsLoading(false)
     } catch (error) {
       console.error(error)
       setOpenAIError(error.message)
@@ -161,15 +156,16 @@ export default function Home() {
   }
 
   const fetchModels = async () => {
+    console.log(openAIApiKey)
     if (!openAIApiKey) return
-    const models = await openAIRequest('GET', '/models', openAIApiKey)
-    setModels(models.data)
+    const openAiModels = await openAIRequest('GET', '/models', openAIApiKey)
+    const models = openAiModels.data.map((model) => ({ name: model.id })).sort((a, b) => a.name.localeCompare(b.name))
+    setModels(models)
   }
 
   useEffect(() => {
-    // Fetch models on component mount
     fetchModels()
-  }, [])
+  }, [openAIApiKey])
 
   useEffect(() => {
     // Call this function when checkboxes state changes
@@ -260,7 +256,7 @@ export default function Home() {
                       onClick={() => localStorage.setItem(field.storageKey, field.value)}
                       disabled={isRepoUrl && isFetchingFileTree}
                     >
-                      {isFetchingFileTree && isRepoUrl ? <SpinnerIcon /> : 'Fetch'}
+                      {isFetchingFileTree && isRepoUrl ? <SpinnerIcon /> : field.buttonText}
                     </button>
                   </div>
                   <div className="text-sm mt-2 opacity-70">
@@ -355,7 +351,7 @@ export default function Home() {
               id: 'models',
               value: model,
               onChange: (e) => setModel(e.target.value),
-              options: [{ name: 'gpt-4' }, { name: 'gpt-3.5-turbo' }]
+              options: models
             },
             {
               label: 'Temperature',

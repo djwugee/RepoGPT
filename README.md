@@ -12,10 +12,13 @@ http://repogpt.markkop.dev/
 
 This app is an enhanced version of [MarcoWorms/RefactorGPT](https://github.com/MarcoWorms/RefactorGPT) with the following extra features:
 
-- Dark theme by default
-- Allow the use of an access token to access private repositories
-- Remember the last used repository in the browser's local storage
-- Has a button to copy the generated files text content
+- Dark theme
+- Access to private repositories with an access token
+- External link to generate key/token
+- Show/hide key/token
+- Remember the last used repository
+- Merged files copy button
+- Error handling and loading states
 
 ---
 
