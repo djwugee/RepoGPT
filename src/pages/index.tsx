@@ -124,19 +124,21 @@ export default function Home() {
           const headers = {} as any
           if (gitHubToken) {
             headers.Authorization = `token ${gitHubToken}`
+            headers.Accept = 'application/vnd.github.v3.raw'
           }
-          const response = await fetch(file.download_url)
+
+          const response = await fetch(file.download_url, { headers })
 
           if (!response.ok) {
             throw new Error(response.statusText)
           }
 
           const content = await response.text()
-          return `######## ${file.name}\n${content}`
+          return `######## ${file.path}\n${content}`
         } catch (error) {
           console.error(error)
           setGithubError(error.message)
-          return `######## ${file.name}\n${error.message}`
+          return `######## ${file.path}\n${error.message}`
         }
       })
     )
@@ -292,6 +294,7 @@ export default function Home() {
                   )}
                   <button
                     id={`save-${field.storageKey}`}
+                    type={field.storageKey === 'repo-url' ? 'submit' : 'button'}
                     onClick={() => localStorage.setItem(field.storageKey, field.value)}
                   >
                     {field.buttonText}
@@ -340,7 +343,7 @@ export default function Home() {
               ))}
             </div>
           </div>
-          <div>
+          <div className="flex-grow">
             <div className="flex space-x-2 mb-2">
               <h2>Merged Files</h2>
               <button onClick={handleCopyToClipboard} className="text-xs px-1 py-0">
@@ -348,7 +351,7 @@ export default function Home() {
               </button>
             </div>
             <textarea
-              className="w-full h-full text-xs"
+              className="w-full h-full text-3xs"
               id="output"
               rows={20}
               cols={80}

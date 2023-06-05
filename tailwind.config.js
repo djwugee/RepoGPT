@@ -10,6 +10,10 @@ module.exports = {
         background: '#0f0f0f',
         surface: '#1f1f1f',
         error: '#FF8A59'
+      },
+      fontSize: {
+        '2xs': '.625rem',
+        '3xs': '.5rem'
       }
     }
   },
