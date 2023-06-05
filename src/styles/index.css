@@ -4,3 +4,10 @@
 /* Your own custom component styles */
 
 @import 'tailwindcss/utilities';
+
+/* Add a default padding to all inputs */
+@layer utilities {
+  input {
+    @apply p-2;
+  }
+}

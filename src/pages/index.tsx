@@ -16,6 +16,19 @@ export default function Home() {
   const [gitHubToken, setGitHubToken] = useState('')
   const [githubError, setGithubError] = useState(null)
   const [openAIError, setOpenAIError] = useState(null)
+  const [showCopyConfirmation, setShowCopyConfirmation] = useState(false)
+
+  const handleCopyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(mergedFiles)
+      setShowCopyConfirmation(true)
+      setTimeout(() => {
+        setShowCopyConfirmation(false)
+      }, 2000)
+    } catch (err) {
+      console.error(`Could not copy text: ${err}`)
+    }
+  }
 
   function retrieveValueFromLocalStorage(key, setter, defaultValue) {
     const savedValue = localStorage.getItem(key)
@@ -235,7 +248,7 @@ export default function Home() {
               )}
               {field.link && (
                 <p className="underline">
-                  <a href={field.link}>Click here to generate an {field.label.toLowerCase()}</a>
+                  <a href={field.link}>Click here to generate {field.label.toLowerCase()}</a>
                 </p>
               )}
             </div>
@@ -271,6 +284,7 @@ export default function Home() {
               <div key={index} style={{ marginLeft: `${file.indentLevel * 10}px` }}>
                 <label>
                   <input
+                    className="mr-1"
                     type="checkbox"
                     disabled={file.type === 'dir'}
                     onChange={(e) => handleSelectFile(file, e.target.checked)}
@@ -283,7 +297,12 @@ export default function Home() {
           </div>
         </div>
         <div>
-          <h2>Merged Files Preview:</h2>
+          <div className="flex space-x-2 mb-2">
+            <h2>Merged Files Preview:</h2>
+            <button onClick={handleCopyToClipboard} className="text-xs bg-indigo-500 text-white px-1 py-1 rounded">
+              {showCopyConfirmation ? 'Copied!' : 'Copy'}
+            </button>
+          </div>
           <textarea
             className="w-full py-2 px-3 border border-gray-300 rounded-md"
             id="output"
