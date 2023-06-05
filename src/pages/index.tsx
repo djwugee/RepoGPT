@@ -4,10 +4,10 @@ import { ExternalLinkIcon } from '../components/ExternalLinkIcon'
 import { GhRibbon } from '../components/GhRibbon'
 import { EyeSlashIcon } from '../components/EyeSlashIcon'
 import { EyeIcon } from '../components/EyeIcon'
-import { handleCopyToClipboard } from '../utils'
+import { githubAPIRequest, handleCopyToClipboard, openAIRequest, retrieveValueFromLocalStorage } from '../utils'
 
 export default function Home() {
-  const [apiKey, setApiKey] = useState('')
+  const [openAIApiKey, setOpenAIApiKey] = useState('')
   const [repoUrl, setRepoUrl] = useState('')
   const [fileTree, setFileTree] = useState([])
   const [mergedFiles, setMergedFiles] = useState('')
@@ -28,16 +28,8 @@ export default function Home() {
   const [showPassword, setShowPassword] = useState(false)
   const [showGithubToken, setShowGithubToken] = useState(false)
 
-  function retrieveValueFromLocalStorage(key, setter, defaultValue) {
-    const savedValue = localStorage.getItem(key)
-    if (savedValue) {
-      setter(savedValue)
-    } else if (defaultValue) {
-      setter(defaultValue)
-    }
-  }
   useEffect(() => {
-    retrieveValueFromLocalStorage('openai-api-key', setApiKey, '')
+    retrieveValueFromLocalStorage('openai-api-key', setOpenAIApiKey, '')
     retrieveValueFromLocalStorage('github-token', setGitHubToken, '')
     retrieveValueFromLocalStorage('github-repo-url', setRepoUrl, 'https://github.com/Markkop/RepoGPT')
   }, [])
@@ -85,13 +77,7 @@ export default function Home() {
       localStorage.setItem('github-repo-url', repoUrl)
       const repoPath = repoUrl.split('github.com/')[1]
       const apiUrl = `https://api.github.com/repos/${repoPath}/contents`
-      const headers = {} as any
-      if (gitHubToken) {
-        headers.Authorization = `token ${gitHubToken}`
-      }
-      const response = await fetch(apiUrl, { headers })
-
-      const json = await response.json()
+      const json = await githubAPIRequest(apiUrl, gitHubToken)
 
       if (json.message) {
         throw new Error(json.message)
@@ -99,7 +85,7 @@ export default function Home() {
 
       const completeFileTree = await displayFileTree(json)
       setFileTree(completeFileTree)
-      setSelectedFiles([]) // Clear selected files when fetching a new file tree
+      setSelectedFiles([])
     } catch (error) {
       console.error(error)
       setGithubError(error.message)
@@ -110,22 +96,11 @@ export default function Home() {
     const fileContents = await Promise.all(
       selectedFiles.map(async (file) => {
         try {
-          const headers = {} as any
-          let response
-          if (gitHubToken) {
-            headers.Authorization = `token ${gitHubToken}`
-            headers.Accept = 'application/vnd.github.v3.raw'
-            response = await fetch(file.url, { headers })
-          } else {
-            response = await fetch(file.download_url)
-          }
+          const response = gitHubToken
+            ? await githubAPIRequest(file.url, gitHubToken, true)
+            : await githubAPIRequest(file.download_url, null, true)
 
-          if (!response.ok) {
-            throw new Error(response.statusText)
-          }
-
-          const content = await response.text()
-          return `######## ${file.path}\n${content}`
+          return `######## ${file.path}\n${response}`
         } catch (error) {
           console.error(error)
           setGithubError(error.message)
@@ -133,12 +108,12 @@ export default function Home() {
         }
       })
     )
+
     const mergedFiles = fileContents.join('\n')
     setMergedFiles(mergedFiles)
   }
 
   useEffect(() => {
-    // Call this function when selectedFiles state changes
     updateMergedFilesPreview()
   }, [selectedFiles])
 
@@ -146,7 +121,7 @@ export default function Home() {
     try {
       e.preventDefault()
       setOpenAIError(null)
-      if (!apiKey) {
+      if (!openAIApiKey) {
         setOpenAIError('Please enter an OpenAI API key')
         return
       }
@@ -158,21 +133,13 @@ export default function Home() {
 
       setIsLoading(true)
 
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${apiKey}`
-        },
-        body: JSON.stringify({
-          model: model,
-          messages: messages,
-          temperature: Number(temperature),
-          max_tokens: Number(maxTokens)
-        })
+      const completion = await openAIRequest('POST', '/chat/completions', openAIApiKey, {
+        model: model,
+        messages: messages,
+        temperature: Number(temperature),
+        max_tokens: Number(maxTokens)
       })
 
-      const completion = await response.json()
       setResponse(completion.choices[0].message.content)
 
       setIsLoading(false)
@@ -183,18 +150,8 @@ export default function Home() {
   }
 
   const fetchModels = async () => {
-    if (!apiKey) {
-      return
-    }
-
-    const response = await fetch('https://api.openai.com/v1/models', {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${apiKey}`
-      }
-    })
-
-    const models = await response.json()
+    if (!openAIApiKey) return
+    const models = await openAIRequest('GET', '/models', openAIApiKey)
     setModels(models.data)
   }
 
@@ -232,8 +189,8 @@ export default function Home() {
                 label: 'OpenAI API Key',
                 placeholder: 'sk-890r6E...KwrM',
                 type: showPassword ? 'text' : 'password',
-                value: apiKey,
-                setValue: setApiKey,
+                value: openAIApiKey,
+                setValue: setOpenAIApiKey,
                 link: 'https://platform.openai.com/account/api-keys',
                 buttonText: 'Save',
                 showToggle: setShowPassword,
