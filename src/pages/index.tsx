@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { twMerge } from 'tailwind-merge'
+import { ExternalLinkIcon } from '../components/ExternalLinkIcon'
 
 export default function Home() {
   const [apiKey, setApiKey] = useState('')
@@ -218,76 +219,70 @@ export default function Home() {
         </p>
 
         <br />
-
-        <div className="flex-col space-y-4">
-          {[
-            {
-              storageKey: 'openai-api-key',
-              label: 'OpenAI API Key',
-              value: apiKey,
-              setValue: setApiKey,
-              link: 'https://platform.openai.com/account/api-keys'
-            },
-            {
-              storageKey: 'github-token',
-              label: 'GitHub Token',
-              optional: true,
-              value: gitHubToken,
-              setValue: setGitHubToken,
-              link: 'https://github.com/settings/tokens'
-            }
-          ].map((field) => (
-            <div key={field.storageKey}>
-              <div className="flex items-center">
-                <input
-                  className="w-96 text-field"
-                  type="password"
-                  id={field.storageKey}
-                  name={field.storageKey}
-                  value={field.value}
-                  onChange={(e) => field.setValue(e.target.value)}
-                />
-                <button
-                  id={`save-${field.storageKey}`}
-                  onClick={() => localStorage.setItem(field.storageKey, field.value)}
-                >
-                  Save {`${field.label}${field.optional ? '' : '*'}`}
-                </button>
+        <form onSubmit={handleGetFileTree} className="">
+          <div className="flex-col space-y-4">
+            {[
+              {
+                storageKey: 'openai-api-key',
+                label: 'OpenAI API Key',
+                type: 'password',
+                value: apiKey,
+                setValue: setApiKey,
+                link: 'https://platform.openai.com/account/api-keys',
+                buttonText: 'Save'
+              },
+              {
+                storageKey: 'github-token',
+                label: 'GitHub Token',
+                type: 'password',
+                value: gitHubToken,
+                setValue: setGitHubToken,
+                link: 'https://github.com/settings/tokens',
+                buttonText: 'Save'
+              },
+              {
+                storageKey: 'repo-url',
+                type: 'text',
+                label: 'Repo URL',
+                value: repoUrl,
+                setValue: setRepoUrl,
+                buttonText: 'Fetch'
+              }
+            ].map((field) => (
+              <div key={field.storageKey}>
+                <div className="flex gap-2 mb-2">
+                  <h2 className="text-primary my-auto">{field.label}</h2>
+                  {field.link && (
+                    <ExternalLinkIcon svgClassName="text-primary h-3 w-3" className="my-auto" href={field.link} />
+                  )}
+                </div>
+                <div className="flex gap-2 items-center">
+                  <input
+                    className="w-96 text-field"
+                    type={field.type}
+                    id={field.storageKey}
+                    name={field.storageKey}
+                    value={field.value}
+                    onChange={(e) => field.setValue(e.target.value)}
+                  />
+                  <button
+                    id={`save-${field.storageKey}`}
+                    onClick={() => localStorage.setItem(field.storageKey, field.value)}
+                  >
+                    {field.buttonText}
+                  </button>
+                </div>
+                <div className="text-sm mt-2 opacity-70">
+                  {field.label === 'GitHub Token' && (
+                    <p>GitHub Token is optional, needed only for a higher rate limit and private repo access.</p>
+                  )}
+                </div>
               </div>
-              <div className="text-sm">
-                {field.label === 'GitHub Token' && (
-                  <p>GitHub Token is optional, needed only for a higher rate limit and private repo access.</p>
-                )}
-                {field.link && (
-                  <p>
-                    <span className="text-accent">
-                      <a href={field.link}>Click here</a>
-                    </span>{' '}
-                    to generate {field.label.toLowerCase()}
-                  </p>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <br />
-
-        <form onSubmit={handleGetFileTree} className="flex items-center">
-          <input
-            className="w-96"
-            type="text"
-            id="repo-url"
-            name="repo-url"
-            value={repoUrl}
-            onChange={(e) => setRepoUrl(e.target.value)}
-            required
-          />
-          <button className="" type="submit">
-            Get File Tree
-          </button>
+            ))}
+          </div>
+          {githubError && <div className="text-error">{githubError}</div>}
         </form>
-        {githubError && <div className="text-error">{githubError}</div>}
+        <br />
 
         <br />
 
