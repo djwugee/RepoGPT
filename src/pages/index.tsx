@@ -82,7 +82,6 @@ export default function Home() {
       const repoPath = repoUrl.split('github.com/')[1]
       const apiUrl = `https://api.github.com/repos/${repoPath}/contents`
       const json = await githubAPIRequest(apiUrl, gitHubToken)
-
       if (json.message) {
         throw new Error(json.message)
       }
@@ -92,7 +91,7 @@ export default function Home() {
       setSelectedFiles([])
     } catch (error) {
       console.error(error)
-      setGithubError(error.message)
+      setGithubError(error.toString())
     } finally {
       setIsFetchingFileTree(false)
     }
@@ -139,7 +138,7 @@ export default function Home() {
 
       messages.push({ role: 'user', content: instruction })
 
-      const completion = await openAIRequest('POST', '/chat/completions', openAIApiKey, {
+      const completion = await openAIRequest('POST', 'chat/completions', openAIApiKey, {
         model: model,
         messages: messages,
         temperature: Number(temperature),
@@ -156,11 +155,16 @@ export default function Home() {
   }
 
   const fetchModels = async () => {
-    console.log(openAIApiKey)
-    if (!openAIApiKey) return
-    const openAiModels = await openAIRequest('GET', '/models', openAIApiKey)
-    const models = openAiModels.data.map((model) => ({ name: model.id })).sort((a, b) => a.name.localeCompare(b.name))
-    setModels(models)
+    try {
+      if (!openAIApiKey) return
+      setOpenAIError(null)
+      const openAiModels = await openAIRequest('GET', '/models', openAIApiKey)
+      const models = openAiModels.data.map((model) => ({ name: model.id })).sort((a, b) => a.name.localeCompare(b.name))
+      setModels(models)
+    } catch (error) {
+      console.error(error)
+      setOpenAIError(error.message)
+    }
   }
 
   useEffect(() => {
