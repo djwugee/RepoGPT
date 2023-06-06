@@ -278,8 +278,8 @@ export default function Home() {
           </div>
           {githubError && <div className="text-error">{githubError}</div>}
         </form>
-        <div className="flex flex-col lg:flex-row flex-wrap">
-          <div className="mb-2 lg:mb-0 lg:min-w-3/4">
+        <div className="flex flex-col lg:flex-row flex-wrap gap-2">
+          <div className="mb-2 lg:mb-5 lg:min-w-[225px]">
             <h2 className="mb-2">Select Files</h2>
             <div id="file-tree" className="text-sm">
               {fileTree.map((file, index) => (
@@ -307,7 +307,7 @@ export default function Home() {
               ))}
             </div>
           </div>
-          <div className="flex-grow">
+          <div className="flex-grow flex flex-col">
             <div className="flex space-x-2 mb-2">
               <h2>Merged Files</h2>
               <button
@@ -319,9 +319,9 @@ export default function Home() {
               {isLoadingFiles && <SpinnerIcon />}
             </div>
             <textarea
-              className="w-full h-full text-3xs"
+              className="w-full flex-grow text-3xs"
               id="output"
-              rows={20}
+              rows={10}
               cols={80}
               readOnly
               value={mergedFiles}

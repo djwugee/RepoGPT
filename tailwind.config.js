@@ -12,8 +12,8 @@ module.exports = {
         error: '#FF8A59'
       },
       fontSize: {
-        '2xs': '.625rem',
-        '3xs': '.5rem'
+        '3xs': ['0.625rem', { lineHeight: '0.875rem' }],
+        '2xs': ['0.6875rem', { lineHeight: '0.9375rem' }]
       }
     }
   },
