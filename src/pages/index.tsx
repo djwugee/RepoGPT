@@ -1,9 +1,7 @@
 import { useEffect, useState } from 'react'
 import { twMerge } from 'tailwind-merge'
-import { ExternalLinkIcon } from '../components/ExternalLinkIcon'
 import { GhRibbon } from '../components/GhRibbon'
-import { EyeSlashIcon } from '../components/EyeSlashIcon'
-import { EyeIcon } from '../components/EyeIcon'
+import { InputField } from '../components/InputField'
 import { SpinnerIcon } from '../components/SpinnerIcon'
 import { useChatCompletion } from '../components/hooks/chatHook'
 import { githubAPIRequest, handleCopyToClipboard, openAIRequest, retrieveValueFromLocalStorage } from '../utils'
@@ -19,7 +17,6 @@ export default function Home() {
   const [model, setModel] = useState('gpt-4')
   const [temperature, setTemperature] = useState(0.1)
   const [maxTokens, setMaxTokens] = useState(4000)
-  const [response, setResponse] = useState('')
   const [models, setModels] = useState([{ name: 'gpt-4' }, { name: 'gpt-3.5-turbo' }])
   const [selectedFiles, setSelectedFiles] = useState([])
   const [gitHubToken, setGitHubToken] = useState('')
@@ -49,6 +46,9 @@ export default function Home() {
     retrieveValueFromLocalStorage('openai-api-key', setOpenAIApiKey, '')
     retrieveValueFromLocalStorage('github-token', setGitHubToken, '')
     retrieveValueFromLocalStorage('github-repo-url', setRepoUrl, 'https://github.com/Markkop/RepoGPT')
+    retrieveValueFromLocalStorage('temperature', setTemperature, 0.1)
+    retrieveValueFromLocalStorage('max-tokens', setMaxTokens, 4000)
+    retrieveValueFromLocalStorage('model', setModel, 'gpt-4')
   }, [])
 
   const displayFileTree = async (fileTree, indentLevel = 0) => {
@@ -197,23 +197,20 @@ export default function Home() {
 
         <br />
         <form onSubmit={handleGetFileTree} className="mb-4">
-          <div className="flex-col space-y-4">
+          <div className="flex gap-2 flex-col lg:flex-row justify-between">
             {[
               {
-                storageKey: 'openai-api-key',
-                label: 'OpenAI API Key',
-                placeholder: 'sk-890r6E...KwrM',
-                type: showPassword ? 'text' : 'password',
-                value: openAIApiKey,
-                setValue: setOpenAIApiKey,
-                link: 'https://platform.openai.com/account/api-keys',
-                buttonText: 'Save',
-                showToggle: setShowPassword,
-                isShowing: showPassword
+                id: 'repo-url',
+                type: 'text',
+                label: 'Repo URL',
+                placeholder: 'https://github.com/Markkop/RepoGPT',
+                value: repoUrl,
+                setValue: setRepoUrl,
+                buttonText: 'Fetch'
               },
               {
-                storageKey: 'github-token',
-                label: 'GitHub Token',
+                id: 'github-token',
+                label: 'GitHub Token (optional)',
                 type: showGithubToken ? 'text' : 'password',
                 value: gitHubToken,
                 placeholder: 'github_pat_11A...GCS',
@@ -222,63 +219,14 @@ export default function Home() {
                 buttonText: 'Save',
                 showToggle: setShowGithubToken,
                 isShowing: showGithubToken
-              },
-              {
-                storageKey: 'repo-url',
-                type: 'text',
-                label: 'Repo URL',
-                placeholder: 'https://github.com/Markkop/RepoGPT',
-                value: repoUrl,
-                setValue: setRepoUrl,
-                buttonText: 'Fetch'
               }
-            ].map((field) => {
-              const isRepoUrl = field.storageKey === 'repo-url'
-              return (
-                <div key={field.storageKey}>
-                  <div className="flex gap-2 mb-2">
-                    <h2 className="text-primary my-auto">{field.label}</h2>
-                    {field.link && (
-                      <ExternalLinkIcon svgClassName="text-primary h-3 w-3" className="my-auto" href={field.link} />
-                    )}
-                  </div>
-                  <div className="flex gap-2 items-center">
-                    <input
-                      className="w-96 text-field"
-                      type={field.type}
-                      id={field.storageKey}
-                      name={field.storageKey}
-                      value={field.value}
-                      placeholder={field.placeholder}
-                      onChange={(e) => field.setValue(e.target.value)}
-                      disabled={isRepoUrl && isFetchingFileTree}
-                    />
-                    {field.showToggle && (
-                      <div onClick={() => field.showToggle(!field.isShowing)}>
-                        {field.isShowing ? <EyeIcon /> : <EyeSlashIcon />}
-                      </div>
-                    )}
-                    <button
-                      id={`save-${field.storageKey}`}
-                      type={isRepoUrl ? 'submit' : 'button'}
-                      onClick={() => localStorage.setItem(field.storageKey, field.value)}
-                      disabled={isRepoUrl && isFetchingFileTree}
-                    >
-                      {isFetchingFileTree && isRepoUrl ? <SpinnerIcon /> : field.buttonText}
-                    </button>
-                  </div>
-                  <div className="text-sm mt-1 opacity-70">
-                    {field.label === 'GitHub Token' && (
-                      <p>GitHub Token is optional, needed only for a higher rate limit and private repo access.</p>
-                    )}
-                  </div>
-                </div>
-              )
-            })}
+            ].map((field) => (
+              <InputField field={field} key={field.id} isFetchingFileTree={isFetchingFileTree} />
+            ))}
           </div>
           {githubError && <div className="text-error">{githubError}</div>}
         </form>
-        <div className="flex flex-col lg:flex-row flex-wrap gap-2">
+        <div className="flex flex-col lg:flex-row flex-wrap gap-2 mb-4">
           <div className="mb-2 lg:mb-5 lg:min-w-[225px]">
             <h2 className="mb-2">Select Files</h2>
             <div id="file-tree" className="text-sm">
@@ -330,78 +278,66 @@ export default function Home() {
           </div>
         </div>
 
-        <h2 className="mb-2">Prompt</h2>
-        <textarea
-          className="w-full resize mb-2"
-          id="instruction"
-          name="instruction"
-          rows={5}
-          cols={80}
-          placeholder="Using Clean Code, refactor the following code to make it more readable."
-          required
-          value={instruction}
-          onChange={(e) => setInstruction(e.target.value)}
-        ></textarea>
-        <div className="flex flex-col lg:flex-row items-left gap-2">
-          {[
-            {
-              label: 'Model',
-              id: 'models',
-              value: model,
-              onChange: (e) => setModel(e.target.value),
-              options: models
-            },
-            {
-              label: 'Temperature',
-              id: 'temperature',
-              type: 'number',
-              min: 0,
-              max: 1,
-              step: '0.1',
-              value: temperature,
-              onChange: (e) => setTemperature(Number(e.target.value))
-            },
-            {
-              label: 'Max Tokens',
-              id: 'max-tokens',
-              type: 'number',
-              min: 1,
-              step: '100',
-              value: maxTokens,
-              onChange: (e) => setMaxTokens(Number(e.target.value))
-            }
-          ].map((input, index) => (
-            <div key={index} className="flex gap-2 justify-start lg:w-full">
-              <label htmlFor={input.id} className="my-auto w-24 lg:w-auto whitespace-nowrap">
-                {input.label}
-              </label>
-              {input.id === 'models' ? (
-                <select
-                  className="flex-grow"
-                  id={input.id}
-                  name={input.id}
-                  value={input.value}
-                  onChange={input.onChange}
-                >
-                  {input.options.map((option, i) => (
-                    <option key={i}>{option.name}</option>
-                  ))}
-                </select>
-              ) : (
-                <input
-                  className="flex-grow py-2 px-3"
-                  type={input.type}
-                  id={input.id}
-                  name={input.id}
-                  min={input.min}
-                  max={input.max}
-                  step={input.step}
-                  value={input.value}
-                  onChange={input.onChange}
-                />
-              )}
-            </div>
-          ))}
+        <div className="flex gap-2 lg:flex-row flex-col flex-col-reverse">
+          <div className="flex flex-col flex-grow">
+            <h2 className="mb-2">Prompt</h2>
+            <textarea
+              className="w-full flex-grow"
+              id="instruction"
+              name="instruction"
+              rows={5}
+              cols={80}
+              placeholder="Using Clean Code, refactor the following code to make it more readable."
+              required
+              value={instruction}
+              onChange={(e) => setInstruction(e.target.value)}
+            ></textarea>
+          </div>
+          <div className="flex flex-col items-left gap-2">
+            {[
+              {
+                id: 'openai-api-key',
+                label: 'OpenAI API Key',
+                placeholder: 'sk-890r6E...KwrM',
+                type: showPassword ? 'text' : 'password',
+                value: openAIApiKey,
+                setValue: setOpenAIApiKey,
+                link: 'https://platform.openai.com/account/api-keys',
+                buttonText: 'Save',
+                showToggle: setShowPassword,
+                isShowing: showPassword
+              },
+              {
+                label: 'Model',
+                id: 'models',
+                type: 'select',
+                value: model,
+                setValue: setModel,
+                options: models
+              },
+              {
+                label: 'Temperature',
+                id: 'temperature',
+                type: 'number',
+                min: 0,
+                max: 1,
+                step: '0.1',
+                value: temperature,
+                setValue: setTemperature
+              },
+              {
+                label: 'Max Tokens',
+                id: 'max-tokens',
+                type: 'number',
+                min: 1,
+                step: '100',
+                value: maxTokens,
+                setValue: setMaxTokens
+              }
+            ].map((input, index) => (
+              <InputField key={index} field={input} />
+            ))}
+          </div>
         </div>
 
         <button className="my-4" id="send-to-openai" onClick={isCompletingChat ? abortResponse : handleSendToOpenAI}>

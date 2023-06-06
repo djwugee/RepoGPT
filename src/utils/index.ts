@@ -16,7 +16,7 @@ export async function handleCopyToClipboard(
   }
 }
 
-export function retrieveValueFromLocalStorage(key: string, setter: (value: string) => void, defaultValue?: string): void {
+export function retrieveValueFromLocalStorage(key: string, setter: (value: any) => void, defaultValue?: any): void {
   const savedValue = localStorage.getItem(key);
   if (savedValue) {
     setter(savedValue);
