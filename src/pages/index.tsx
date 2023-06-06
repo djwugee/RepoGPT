@@ -177,8 +177,8 @@ export default function Home() {
   }, [fileTree])
 
   return (
-    <main className="bg-background text-secondary pt-4">
-      <div className="bg-surface font-sans px-5 max-w-5xl mx-auto shadow-l-lg relative">
+    <main className="bg-background text-secondary ">
+      <div className="bg-surface font-sans px-5 max-w-5xl mx-auto shadow-l-lg relative py-4">
         <GhRibbon />
         <h1 className="font-bold text-2xl mb-5 text-primary">🗃️ RepoGPT</h1>
 
@@ -192,7 +192,7 @@ export default function Home() {
         </p>
 
         <br />
-        <form onSubmit={handleGetFileTree} className="">
+        <form onSubmit={handleGetFileTree} className="mb-4">
           <div className="flex-col space-y-4">
             {[
               {
@@ -263,7 +263,7 @@ export default function Home() {
                       {isFetchingFileTree && isRepoUrl ? <SpinnerIcon /> : field.buttonText}
                     </button>
                   </div>
-                  <div className="text-sm mt-2 opacity-70">
+                  <div className="text-sm mt-1 opacity-70">
                     {field.label === 'GitHub Token' && (
                       <p>GitHub Token is optional, needed only for a higher rate limit and private repo access.</p>
                     )}
@@ -274,12 +274,8 @@ export default function Home() {
           </div>
           {githubError && <div className="text-error">{githubError}</div>}
         </form>
-        <br />
-
-        <br />
-
-        <div className="flex flex-col lg:flex-row flex-wrap lg:flex-nowrap justify-between gap-2">
-          <div>
+        <div className="flex flex-col lg:flex-row flex-wrap">
+          <div className="mb-2 lg:mb-0 lg:min-w-3/4">
             <h2 className="mb-2">Select Files</h2>
             <div id="file-tree" className="text-sm">
               {fileTree.map((file, index) => (
@@ -330,24 +326,18 @@ export default function Home() {
           </div>
         </div>
 
-        <br />
-        <br />
-
         <h2 className="mb-2">Prompt</h2>
         <textarea
-          className="w-full"
+          className="w-full resize mb-2"
           id="instruction"
           name="instruction"
-          rows={20}
+          rows={5}
           cols={80}
           placeholder="Using Clean Code, refactor the following code to make it more readable."
           required
           value={instruction}
           onChange={(e) => setInstruction(e.target.value)}
         ></textarea>
-
-        <br />
-
         <div className="flex flex-col lg:flex-row items-left gap-2">
           {[
             {
