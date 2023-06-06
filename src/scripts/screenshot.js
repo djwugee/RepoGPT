@@ -18,7 +18,7 @@ require('dotenv').config()
         // set the viewport size
         await page.setViewport({
           width: 1024,
-          height: 630,
+          height: 430,
           deviceScaleFactor: 1
         })
 
