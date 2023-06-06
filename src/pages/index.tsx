@@ -177,7 +177,7 @@ export default function Home() {
   }, [fileTree])
 
   return (
-    <main className="bg-background text-secondary">
+    <main className="bg-background text-secondary pt-4">
       <div className="bg-surface font-sans px-5 max-w-5xl mx-auto shadow-l-lg relative">
         <GhRibbon />
         <h1 className="font-bold text-2xl mb-5 text-primary">🗃️ RepoGPT</h1>
@@ -280,7 +280,7 @@ export default function Home() {
 
         <div className="flex flex-col lg:flex-row flex-wrap lg:flex-nowrap justify-between gap-2">
           <div>
-            <h2>Select Files</h2>
+            <h2 className="mb-2">Select Files</h2>
             <div id="file-tree" className="text-sm">
               {fileTree.map((file, index) => (
                 <div key={index} style={{ marginLeft: `${file.indentLevel * 10}px` }}>
@@ -333,7 +333,7 @@ export default function Home() {
         <br />
         <br />
 
-        <h2>Prompt</h2>
+        <h2 className="mb-2">Prompt</h2>
         <textarea
           className="w-full"
           id="instruction"
@@ -417,7 +417,7 @@ export default function Home() {
 
         <br />
 
-        <h2>OpenAI Response</h2>
+        <h2 className="mb-2">OpenAI Response</h2>
         <textarea
           className="w-full"
           id="openai-response"
