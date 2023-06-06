@@ -18,7 +18,7 @@
   textarea,
   input,
   select {
-    @apply p-2 border border-accent rounded-md bg-background text-tertiary disabled:cursor-not-allowed disabled:opacity-50;
+    @apply p-2 border border-accent rounded-md bg-background text-tertiary disabled:cursor-not-allowed disabled:opacity-50 text-sm;
   }
 
   input[type='checkbox'] {
