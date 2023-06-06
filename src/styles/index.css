@@ -27,7 +27,7 @@
 
   button,
   button[type='submit'] {
-    @apply text-accent hover:text-background hover:bg-accent border border-accent hover:border-accent px-4 py-2 rounded transition-colors duration-150 ease-in-out disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:opacity-50;
+    @apply stroke-accent text-accent hover:text-background hover:stroke-background hover:bg-accent border border-accent hover:border-accent px-4 py-2 rounded transition duration-150 ease-in-out disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:opacity-50;
   }
 }
 

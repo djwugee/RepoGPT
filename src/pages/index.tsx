@@ -197,7 +197,7 @@ export default function Home() {
 
         <br />
         <form onSubmit={handleGetFileTree} className="mb-4">
-          <div className="flex gap-2 flex-col lg:flex-row justify-between">
+          <div className="flex gap-2 flex-col-reverse lg:flex-row justify-between">
             {[
               {
                 id: 'repo-url',
@@ -278,7 +278,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="flex gap-2 lg:flex-row flex-col flex-col-reverse">
+        <div className="flex gap-2 lg:flex-row flex-col-reverse">
           <div className="flex flex-col flex-grow">
             <h2 className="mb-2">Prompt</h2>
             <textarea

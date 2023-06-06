@@ -2,8 +2,12 @@ import { EyeIcon } from './EyeIcon'
 import { EyeSlashIcon } from './EyeSlashIcon'
 import { ExternalLinkIcon } from './ExternalLinkIcon'
 import { SpinnerIcon } from './SpinnerIcon'
+import { CheckIcon } from './CheckIcon'
+import { useState } from 'react'
 
 export function InputField({ field, isFetchingFileTree = false }) {
+  const [showSaved, setShowSaved] = useState(false)
+
   const isRepoUrl = field.id === 'repo-url'
   const buttonText = field.buttonText || 'Save'
 
@@ -41,6 +45,12 @@ export function InputField({ field, isFetchingFileTree = false }) {
     )
   }
 
+  const renderButton = () => {
+    if (isFetchingFileTree && isRepoUrl) return <SpinnerIcon />
+    if (showSaved) return <CheckIcon />
+    return buttonText
+  }
+
   return (
     <div key={field.id}>
       <div className="flex gap-2 mb-2">
@@ -58,10 +68,16 @@ export function InputField({ field, isFetchingFileTree = false }) {
           className="w-24"
           id={`save-${field.id}`}
           type={isRepoUrl ? 'submit' : 'button'}
-          onClick={() => localStorage.setItem(field.id, field.value)}
+          onClick={() => {
+            localStorage.setItem(field.id, field.value)
+            if (buttonText === 'Save') {
+              setShowSaved(true)
+              setTimeout(() => setShowSaved(false), 1000)
+            }
+          }}
           disabled={isRepoUrl && isFetchingFileTree}
         >
-          {isFetchingFileTree && isRepoUrl ? <SpinnerIcon /> : buttonText}
+          {renderButton()}
         </button>
       </div>
     </div>
