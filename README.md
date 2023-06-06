@@ -13,11 +13,12 @@ http://repogpt.markkop.dev/
 This app is an enhanced version of [MarcoWorms/RefactorGPT](https://github.com/MarcoWorms/RefactorGPT) with the following extra features:
 
 - Dark theme
+- Merged files copy button
 - Access to private repositories with an access token
 - External link to generate key/token
 - Show/hide key/token
 - Remember the last used repository
-- Merged files copy button
+- Streamed response from OpenAI API
 - Error handling and loading states
 
 ---

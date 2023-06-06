@@ -5,6 +5,7 @@ import { GhRibbon } from '../components/GhRibbon'
 import { EyeSlashIcon } from '../components/EyeSlashIcon'
 import { EyeIcon } from '../components/EyeIcon'
 import { SpinnerIcon } from '../components/SpinnerIcon'
+import { useChatCompletion } from '../components/hooks/chatHook'
 import { githubAPIRequest, handleCopyToClipboard, openAIRequest, retrieveValueFromLocalStorage } from '../utils'
 
 export default function Home() {
@@ -29,7 +30,20 @@ export default function Home() {
   const [showGithubToken, setShowGithubToken] = useState(false)
   const [isFetchingFileTree, setIsFetchingFileTree] = useState(false)
   const [isLoadingFiles, setIsLoadingFiles] = useState(false)
-  const [isCompletingChat, setIsCompletingChat] = useState(false)
+  const {
+    messages,
+    loading: isCompletingChat,
+    submitPrompt,
+    error: chatCompletionError,
+    abortResponse,
+    resetMessages
+  } = useChatCompletion({
+    model: model as any,
+    apiKey: openAIApiKey,
+    temperature: Number(temperature),
+    max_tokens: Number(maxTokens)
+  })
+  const assistantMessages = messages.filter((msg) => msg.role === 'assistant')
 
   useEffect(() => {
     retrieveValueFromLocalStorage('openai-api-key', setOpenAIApiKey, '')
@@ -126,31 +140,21 @@ export default function Home() {
   const handleSendToOpenAI = async (e) => {
     try {
       e.preventDefault()
-      setIsCompletingChat(true)
       setOpenAIError(null)
       if (!openAIApiKey) {
         setOpenAIError('Please enter an OpenAI API key')
         return
       }
-      const messages = mergedFiles.split('\n########').map((content) => {
+      const messageContents = mergedFiles.split('\n########').map((content) => {
         return { role: 'user', content: '######## ' + content.trim() }
       })
 
-      messages.push({ role: 'user', content: instruction })
+      messageContents.push({ role: 'user', content: instruction })
 
-      const completion = await openAIRequest('POST', 'chat/completions', openAIApiKey, {
-        model: model,
-        messages: messages,
-        temperature: Number(temperature),
-        max_tokens: Number(maxTokens)
-      })
-
-      setResponse(completion.choices[0].message.content)
+      submitPrompt(messageContents as any)
     } catch (error) {
       console.error(error)
       setOpenAIError(error.message)
-    } finally {
-      setIsCompletingChat(false)
     }
   }
 
@@ -400,22 +404,22 @@ export default function Home() {
           ))}
         </div>
 
-        <button className="my-4" id="send-to-openai" onClick={handleSendToOpenAI} disabled={isCompletingChat}>
-          {isCompletingChat ? <SpinnerIcon /> : 'Send to OpenAI'}
+        <button className="my-4" id="send-to-openai" onClick={isCompletingChat ? abortResponse : handleSendToOpenAI}>
+          {isCompletingChat ? 'Abort' : 'Send to OpenAI'}
         </button>
         {openAIError && <div className="text-error">{openAIError}</div>}
+        {chatCompletionError && <div className="text-error">{String(chatCompletionError)}</div>}
 
         <br />
 
         <h2 className="mb-2">OpenAI Response</h2>
         <textarea
-          className="w-full"
-          id="openai-response"
+          className="w-full resize mb-2"
+          id="response"
+          name="response"
           rows={20}
           cols={80}
-          readOnly
-          value={response}
-          onChange={(e) => setResponse(e.target.value)}
+          value={assistantMessages.length < 1 ? '' : assistantMessages.map((msg, i) => msg.content)}
         ></textarea>
       </div>
     </main>
