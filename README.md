@@ -1,31 +1,40 @@
 # 🗃️ RepoGPT
 
-Merge files from a Github repository to send them to OpenAI API with a prompt.
+[![Vercel](https://therealsujitk-vercel-badge.vercel.app/?app=repo-gpt-black)](http://repogpt.markkop.dev/)
+[![https://img.shields.io/badge/made%20with-AI-blue](https://img.shields.io/badge/made%20with-AI-blue)](https://reactjs.org/)
 
-Tip: if you have ChatGPT Plus, copy/paste the preview in the chat to save API costs
+Merge files from a Github repository to
 
-http://repogpt.markkop.dev/
+- Send them to OpenAI API with a prompt
+- Copy/paste them into ChatGPT
 
+Demo: http://repogpt.markkop.dev/
+
+Follow me on Twitter for more AI tools:
+[@HeyMarkKop](https://twitter.com/HeyMarkKop)
+
+Preview:
 ![Demo](/public/og.png)
 
 ---
 
 This app is an enhanced version of [MarcoWorms/RefactorGPT](https://github.com/MarcoWorms/RefactorGPT) with the following extra features:
 
-- Dark theme
-- Merged files copy button
-- Access to private repositories with an access token
-- External link to generate key/token
-- Show/hide key/token
-- Remember the last used repository
-- Streamed response from OpenAI API
-- Error handling and loading states
+- 🌒 Dark theme
+- 🖱️ Merged files copy button
+- 🔐 Access to private repositories with an access token
+- 🔗 External link to generate key/token
+- 👀 Show/hide key/token
+- 💾 Remember configs in local storage
+- 🚂 Streamed response from OpenAI API
+- ❌ Error handling and loading states
 
 ---
 
-The refactor and new implementations were mostly made by AI using only ChatGPT and [Genie VSCode Extensions](https://github.com/ai-genie/chatgpt-vscode).
+The refactor and new implementations were mostly made by AI using ChatGPT and [Genie VSCode Extensions](https://github.com/ai-genie/chatgpt-vscode).
 
 Eg.
 
-- [https://chat.openai.com/share/63d1b1d7-f012-49b0-9d8c-fa94156ec98a](https://chat.openai.com/share/63d1b1d7-f012-49b0-9d8c-fa94156ec98a)
-- [https://twitter.com/HeyMarkKop/status/1665516657039515650](https://twitter.com/HeyMarkKop/status/1665516657039515650)
+- [ChatGPT conversation to migrate project to Next.js](https://chat.openai.com/share/63d1b1d7-f012-49b0-9d8c-fa94156ec98a)
+- [ChatGPT conversation to add loading states](https://chat.openai.com/share/6f8dbbb0-9b89-41ee-b7d5-8fbd9ac7fd58)
+- [Genie VSCode Extension usage example](https://twitter.com/HeyMarkKop/status/1665516657039515650)

@@ -191,8 +191,7 @@ export default function Home() {
           Or copy/paste them into chatbots like{' '}
           <span className="text-accent hover:underline">
             <a href="https://chatgpt.com">ChatGPT</a>
-          </span>{' '}
-          to save API costs
+          </span>
         </p>
 
         <br />
