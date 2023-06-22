@@ -190,7 +190,7 @@ export default function Home() {
         <p className="text-sm opacity-70">
           Or copy/paste them into chatbots like{' '}
           <span className="text-accent hover:underline">
-            <a href="https://chatgpt.com">ChatGPT</a>
+            <a href="https://chat.openai.com/">ChatGPT</a>
           </span>
         </p>
 
