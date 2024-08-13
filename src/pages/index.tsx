@@ -246,8 +246,21 @@ export default function Home() {
                       selectedFiles.includes(file) && 'text-primary opacity-100',
                       file.type === 'dir' && 'opacity-70'
                     )}
+                  >
+                    {file.type === 'dir' ? (
+                      <span onClick={() => handleFolderClick(file.path)} className="cursor-pointer">
+                        {expandedFolders[file.path] ? '📂' : '📁'} 
+                      </span>
+                    ) : (
+                      <input
+                        className="mr-2"
+                        type="checkbox"
+                        onChange={(e) => handleSelectFile(file, e.target.checked)}
+                        checked={selectedFiles.includes(file)}
+                      />
+                    )}
                     {file.name}
-                  </label> */}
+                  </label>
                   {file.type === 'dir' && expandedFolders[file.path] && (
                     <div>
                       {fileTree
@@ -279,21 +292,6 @@ export default function Home() {
                         ))}
                     </div>
                   )}
-           
-                    {file.type === 'dir' ? (
-                      <span onClick={() => handleFolderClick(file.path)} className="cursor-pointer">
-                        {expandedFolders[file.path] ? '📂' : '📁'} 
-                      </span>
-                    ) : (
-                      <input
-                        className="mr-2"
-                        type="checkbox"
-                        onChange={(e) => handleSelectFile(file, e.target.checked)}
-                        checked={selectedFiles.includes(file)}
-                      />
-                    )}
-                    {file.name}
-                  </label>
                 </div>
               ))}
             </div>
