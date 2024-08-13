@@ -26,6 +26,7 @@ export default function Home() {
   const [showPassword, setShowPassword] = useState(false)
   const [showGithubToken, setShowGithubToken] = useState(false)
   const [isFetchingFileTree, setIsFetchingFileTree] = useState(false)
+  const [expandedFolders, setExpandedFolders] = useState({})
   const [isLoadingFiles, setIsLoadingFiles] = useState(false)
   const {
     messages,
@@ -51,11 +52,12 @@ export default function Home() {
     retrieveValueFromLocalStorage('model', setModel, 'gpt-4')
   }, [])
 
-  const displayFileTree = async (fileTree, indentLevel = 0) => {
+  const displayFileTree = async (fileTree, indentLevel = 0, parentPath = '') => {
     let allFiles = []
     for (const file of fileTree) {
       file.indentLevel = indentLevel
-      allFiles.push(file)
+      const filePath = `${parentPath}/${file.name}`
+      allFiles.push({ ...file, path: filePath })
       if (file.type === 'dir') {
         const headers = {} as any
         if (gitHubToken) {
@@ -65,7 +67,7 @@ export default function Home() {
         const childFileTree = await response.json()
         // Ensure that childFileTree is an array before trying to iterate over it
         if (Array.isArray(childFileTree)) {
-          const childFiles = await displayFileTree(childFileTree, indentLevel + 1)
+          const childFiles = await displayFileTree(childFileTree, indentLevel + 1, filePath)
           allFiles = [...allFiles, ...childFiles]
         } else {
           console.error('Child file tree is not iterable:', childFileTree)
@@ -82,7 +84,7 @@ export default function Home() {
         return [...prevFiles, file]
       } else {
         // File unselected, remove it
-        return prevFiles.filter((f) => f !== file)
+        return prevFiles.filter((f) => !f.path.startsWith(file.path))
       }
     })
   }
@@ -180,6 +182,13 @@ export default function Home() {
     updateMergedFilesPreview()
   }, [fileTree])
 
+  const handleFolderClick = (folderPath) => {
+    setExpandedFolders((prev) => ({
+      ...prev,
+      [folderPath]: !prev[folderPath],
+    }))
+  }
+
   return (
     <main className="bg-background text-secondary ">
       <div className="bg-surface font-sans px-5 max-w-5xl mx-auto shadow-l-lg relative py-4">
@@ -236,10 +245,51 @@ export default function Home() {
                       'text-secondary opacity-90',
                       selectedFiles.includes(file) && 'text-primary opacity-100',
                       file.type === 'dir' && 'opacity-70'
+                    ) : (
+                      <input
+                        className="mr-2"
+                        type="checkbox"
+                        onChange={(e) => handleSelectFile(file, e.target.checked)}
+                        checked={selectedFiles.includes(file)}
+                      />
+                    )}
+                    {file.name}
+                    {file.type === 'dir' && expandedFolders[file.path] && (
+                      <div>
+                        {fileTree
+                          .filter((f) => f.path.startsWith(file.path) && f.path !== file.path)
+                          .map((nestedFile, nestedIndex) => (
+                            <div key={nestedIndex} style={{ marginLeft: `${(nestedFile.indentLevel + 1) * 10}px` }}>
+                              <label
+                                className={twMerge(
+                                  'text-secondary opacity-90',
+                                  selectedFiles.includes(nestedFile) && 'text-primary opacity-100',
+                                  nestedFile.type === 'dir' && 'opacity-70'
+                                )}
+                              >
+                                {nestedFile.type === 'dir' ? (
+                                  <span onClick={() => handleFolderClick(nestedFile.path)} className="cursor-pointer">
+                                    {expandedFolders[nestedFile.path] ? '📂' : '📁'} 
+                                  </span>
+                                ) : (
+                                  <input
+                                    className="mr-2"
+                                    type="checkbox"
+                                    onChange={(e) => handleSelectFile(nestedFile, e.target.checked)}
+                                    checked={selectedFiles.includes(nestedFile)}
+                                  />
+                                )}
+                                {nestedFile.name}
+                              </label>
+                            </div>
+                          ))}
+                      </div>
                     )}
                   >
                     {file.type === 'dir' ? (
-                      <>📁 </>
+                      <span onClick={() => handleFolderClick(file.path)} className="cursor-pointer">
+                        {expandedFolders[file.path] ? '📂' : '📁'} 
+                      </span>
                     ) : (
                       <input
                         className="mr-2"
