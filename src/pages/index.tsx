@@ -245,46 +245,40 @@ export default function Home() {
                       'text-secondary opacity-90',
                       selectedFiles.includes(file) && 'text-primary opacity-100',
                       file.type === 'dir' && 'opacity-70'
-                    ) : (
-                      <input
-                        className="mr-2"
-                        type="checkbox"
-                        onChange={(e) => handleSelectFile(file, e.target.checked)}
-                        checked={selectedFiles.includes(file)}
-                      />
                     )}
                     {file.name}
-                    {file.type === 'dir' && expandedFolders[file.path] && (
-                      <div>
-                        {fileTree
-                          .filter((f) => f.path.startsWith(file.path) && f.path !== file.path)
-                          .map((nestedFile, nestedIndex) => (
-                            <div key={nestedIndex} style={{ marginLeft: `${(nestedFile.indentLevel + 1) * 10}px` }}>
-                              <label
-                                className={twMerge(
-                                  'text-secondary opacity-90',
-                                  selectedFiles.includes(nestedFile) && 'text-primary opacity-100',
-                                  nestedFile.type === 'dir' && 'opacity-70'
-                                )}
-                              >
-                                {nestedFile.type === 'dir' ? (
-                                  <span onClick={() => handleFolderClick(nestedFile.path)} className="cursor-pointer">
-                                    {expandedFolders[nestedFile.path] ? '📂' : '📁'} 
-                                  </span>
-                                ) : (
-                                  <input
-                                    className="mr-2"
-                                    type="checkbox"
-                                    onChange={(e) => handleSelectFile(nestedFile, e.target.checked)}
-                                    checked={selectedFiles.includes(nestedFile)}
-                                  />
-                                )}
-                                {nestedFile.name}
-                              </label>
-                            </div>
-                          ))}
-                      </div>
-                    )}
+                  </label>
+                  {file.type === 'dir' && expandedFolders[file.path] && (
+                    <div>
+                      {fileTree
+                        .filter((f) => f.path.startsWith(file.path) && f.path !== file.path)
+                        .map((nestedFile, nestedIndex) => (
+                          <div key={nestedIndex} style={{ marginLeft: `${(nestedFile.indentLevel + 1) * 10}px` }}>
+                            <label
+                              className={twMerge(
+                                'text-secondary opacity-90',
+                                selectedFiles.includes(nestedFile) && 'text-primary opacity-100',
+                                nestedFile.type === 'dir' && 'opacity-70'
+                              )}
+                            >
+                              {nestedFile.type === 'dir' ? (
+                                <span onClick={() => handleFolderClick(nestedFile.path)} className="cursor-pointer">
+                                  {expandedFolders[nestedFile.path] ? '📂' : '📁'} 
+                                </span>
+                              ) : (
+                                <input
+                                  className="mr-2"
+                                  type="checkbox"
+                                  onChange={(e) => handleSelectFile(nestedFile, e.target.checked)}
+                                  checked={selectedFiles.includes(nestedFile)}
+                                />
+                              )}
+                              {nestedFile.name}
+                            </label>
+                          </div>
+                        ))}
+                    </div>
+                  )}
                   >
                     {file.type === 'dir' ? (
                       <span onClick={() => handleFolderClick(file.path)} className="cursor-pointer">
