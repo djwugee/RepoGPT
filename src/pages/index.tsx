@@ -81,29 +81,29 @@ export default function Home() {
 
   const handleSelectFile = (file, checked) => {
     setSelectedFiles((prevFiles) => {
-      let updatedFiles;
+      let updatedFiles
       if (checked) {
-        updatedFiles = [...prevFiles, file];
+        updatedFiles = [...prevFiles, file]
       } else {
-        updatedFiles = prevFiles.filter((f) => !f.path.startsWith(file.path));
+        updatedFiles = prevFiles.filter((f) => !f.path.startsWith(file.path))
       }
 
       // Select/unselect nested files and folders
       if (file.type === 'dir') {
-        const nestedFiles = fileTree.filter(f => f.path.startsWith(file.path));
-        nestedFiles.forEach(nestedFile => {
+        const nestedFiles = fileTree.filter((f) => f.path.startsWith(file.path))
+        nestedFiles.forEach((nestedFile) => {
           if (checked) {
             if (!updatedFiles.includes(nestedFile)) {
-              updatedFiles.push(nestedFile);
+              updatedFiles.push(nestedFile)
             }
           } else {
-            updatedFiles = updatedFiles.filter(f => f.path !== nestedFile.path);
+            updatedFiles = updatedFiles.filter((f) => f.path !== nestedFile.path)
           }
-        });
+        })
       }
 
-      return updatedFiles;
-    });
+      return updatedFiles
+    })
   }
 
   const handleGetFileTree = async (e) => {
@@ -200,15 +200,15 @@ export default function Home() {
 
   const handleFolderClick = (folderPath) => {
     setExpandedFolders((prev) => {
-      const isExpanded = !prev[folderPath];
-      const updatedFolders = { ...prev, [folderPath]: isExpanded };
+      const isExpanded = !prev[folderPath]
+      const updatedFolders = { ...prev, [folderPath]: isExpanded }
 
       // Select/unselect nested files and folders
-      const nestedFiles = fileTree.filter(file => file.path.startsWith(folderPath));
-      nestedFiles.forEach(file => handleSelectFile(file, isExpanded));
+      const nestedFiles = fileTree.filter((file) => file.path.startsWith(folderPath))
+      nestedFiles.forEach((file) => handleSelectFile(file, isExpanded))
 
-      return updatedFolders;
-    });
+      return updatedFolders
+    })
   }
 
   return (
@@ -265,9 +265,10 @@ export default function Home() {
                 <div key={index} style={{ marginLeft: `${file.indentLevel * 10}px` }}>
                   <label
                     className={twMerge(
-                      'text-primary opacity-90',
+                      'text-secondary opacity-90',
                       selectedFiles.includes(file) && 'opacity-100',
-                      file.type === 'dir' && expandedFolders[file.path] && 'font-bold'
+                      file.type === 'dir' && 'text-primary',
+                      expandedFolders[file.path] && 'font-bold'
                     )}
                   >
                     {file.type === 'dir' ? (
