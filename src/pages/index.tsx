@@ -81,12 +81,29 @@ export default function Home() {
 
   const handleSelectFile = (file, checked) => {
     setSelectedFiles((prevFiles) => {
+      let updatedFiles;
       if (checked) {
-        return [...prevFiles, file]
+        updatedFiles = [...prevFiles, file];
       } else {
-        return prevFiles.filter((f) => !f.path.startsWith(file.path))
+        updatedFiles = prevFiles.filter((f) => !f.path.startsWith(file.path));
       }
-    })
+
+      // Select/unselect nested files and folders
+      if (file.type === 'dir') {
+        const nestedFiles = fileTree.filter(f => f.path.startsWith(file.path));
+        nestedFiles.forEach(nestedFile => {
+          if (checked) {
+            if (!updatedFiles.includes(nestedFile)) {
+              updatedFiles.push(nestedFile);
+            }
+          } else {
+            updatedFiles = updatedFiles.filter(f => f.path !== nestedFile.path);
+          }
+        });
+      }
+
+      return updatedFiles;
+    });
   }
 
   const handleGetFileTree = async (e) => {
@@ -182,10 +199,16 @@ export default function Home() {
   }, [fileTree])
 
   const handleFolderClick = (folderPath) => {
-    setExpandedFolders((prev) => ({
-      ...prev,
-      [folderPath]: !prev[folderPath]
-    }))
+    setExpandedFolders((prev) => {
+      const isExpanded = !prev[folderPath];
+      const updatedFolders = { ...prev, [folderPath]: isExpanded };
+
+      // Select/unselect nested files and folders
+      const nestedFiles = fileTree.filter(file => file.path.startsWith(folderPath));
+      nestedFiles.forEach(file => handleSelectFile(file, isExpanded));
+
+      return updatedFolders;
+    });
   }
 
   return (
