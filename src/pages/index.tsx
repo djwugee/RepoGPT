@@ -265,9 +265,9 @@ export default function Home() {
                 <div key={index} style={{ marginLeft: `${file.indentLevel * 10}px` }}>
                   <label
                     className={twMerge(
-                      'text-secondary opacity-90',
-                      selectedFiles.includes(file) && 'text-primary opacity-100',
-                      file.type === 'dir' && expandedFolders[file.path] && 'font-bold text-primary'
+                      'text-primary opacity-90',
+                      selectedFiles.includes(file) && 'opacity-100',
+                      file.type === 'dir' && expandedFolders[file.path] && 'font-bold'
                     )}
                   >
                     {file.type === 'dir' ? (
