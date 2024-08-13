@@ -28,6 +28,7 @@ export default function Home() {
   const [isFetchingFileTree, setIsFetchingFileTree] = useState(false)
   const [expandedFolders, setExpandedFolders] = useState({})
   const [isLoadingFiles, setIsLoadingFiles] = useState(false)
+
   const {
     messages,
     loading: isCompletingChat,
@@ -41,6 +42,7 @@ export default function Home() {
     temperature: Number(temperature),
     max_tokens: Number(maxTokens)
   })
+
   const assistantMessages = messages.filter((msg) => msg.role === 'assistant')
 
   useEffect(() => {
@@ -80,10 +82,8 @@ export default function Home() {
   const handleSelectFile = (file, checked) => {
     setSelectedFiles((prevFiles) => {
       if (checked) {
-        // New file selected
         return [...prevFiles, file]
       } else {
-        // File unselected, remove it
         return prevFiles.filter((f) => !f.path.startsWith(file.path))
       }
     })
@@ -178,19 +178,18 @@ export default function Home() {
   }, [openAIApiKey])
 
   useEffect(() => {
-    // Call this function when checkboxes state changes
     updateMergedFilesPreview()
   }, [fileTree])
 
   const handleFolderClick = (folderPath) => {
     setExpandedFolders((prev) => ({
       ...prev,
-      [folderPath]: !prev[folderPath],
+      [folderPath]: !prev[folderPath]
     }))
   }
 
   return (
-    <main className="bg-background text-secondary ">
+    <main className="bg-background text-secondary">
       <div className="bg-surface font-sans px-5 max-w-5xl mx-auto shadow-l-lg relative py-4">
         <GhRibbon />
         <h1 className="font-bold text-2xl mb-5 text-primary">🗃️ RepoGPT</h1>
@@ -234,13 +233,14 @@ export default function Home() {
           </div>
           {githubError && <div className="text-error">{githubError}</div>}
         </form>
+
         <div className="flex flex-col lg:flex-row flex-wrap gap-2 mb-4">
           <div className="mb-2 lg:mb-5 lg:min-w-[225px]">
             <h2 className="mb-2">Select Files</h2>
             <div id="file-tree" className="text-sm">
               {fileTree.map((file, index) => (
                 <div key={index} style={{ marginLeft: `${file.indentLevel * 10}px` }}>
-                  {/* <label
+                  <label
                     className={twMerge(
                       'text-secondary opacity-90',
                       selectedFiles.includes(file) && 'text-primary opacity-100',
@@ -249,7 +249,7 @@ export default function Home() {
                   >
                     {file.type === 'dir' ? (
                       <span onClick={() => handleFolderClick(file.path)} className="cursor-pointer">
-                        {expandedFolders[file.path] ? '📂' : '📁'} 
+                        {expandedFolders[file.path] ? '📂' : '📁'}
                       </span>
                     ) : (
                       <input
@@ -261,41 +261,11 @@ export default function Home() {
                     )}
                     {file.name}
                   </label>
-                  {file.type === 'dir' && expandedFolders[file.path] && (
-                    <div>
-                      {fileTree
-                        .filter((f) => f.path.startsWith(file.path) && f.path !== file.path)
-                        .map((nestedFile, nestedIndex) => (
-                          <div key={nestedIndex} style={{ marginLeft: `${(nestedFile.indentLevel + 1) * 10}px` }}>
-                            <label
-                              className={twMerge(
-                                'text-secondary opacity-90',
-                                selectedFiles.includes(nestedFile) && 'text-primary opacity-100',
-                                nestedFile.type === 'dir' && 'opacity-70'
-                              )}
-                            >
-                              {nestedFile.type === 'dir' ? (
-                                <span onClick={() => handleFolderClick(nestedFile.path)} className="cursor-pointer">
-                                  {expandedFolders[nestedFile.path] ? '📂' : '📁'} 
-                                </span>
-                              ) : (
-                                <input
-                                  className="mr-2"
-                                  type="checkbox"
-                                  onChange={(e) => handleSelectFile(nestedFile, e.target.checked)}
-                                  checked={selectedFiles.includes(nestedFile)}
-                                />
-                              )}
-                              {nestedFile.name}
-                            </label>
-                          </div>
-                        ))}
-                    </div>
-                  )}
                 </div>
               ))}
             </div>
           </div>
+
           <div className="flex-grow flex flex-col">
             <div className="flex space-x-2 mb-2">
               <h2>Merged Files</h2>
@@ -396,7 +366,8 @@ export default function Home() {
           name="response"
           rows={20}
           cols={80}
-          value={assistantMessages.length < 1 ? '' : assistantMessages.map((msg, i) => msg.content)}
+          value={assistantMessages.length < 1 ? '' : assistantMessages.map((msg) => msg.content).join('\n')}
+          readOnly
         ></textarea>
       </div>
     </main>
