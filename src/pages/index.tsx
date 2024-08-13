@@ -26,7 +26,9 @@ export default function Home() {
   const [showPassword, setShowPassword] = useState(false)
   const [showGithubToken, setShowGithubToken] = useState(false)
   const [isFetchingFileTree, setIsFetchingFileTree] = useState(false)
+  const [expandedFolders, setExpandedFolders] = useState({})
   const [isLoadingFiles, setIsLoadingFiles] = useState(false)
+
   const {
     messages,
     loading: isCompletingChat,
@@ -40,6 +42,7 @@ export default function Home() {
     temperature: Number(temperature),
     max_tokens: Number(maxTokens)
   })
+
   const assistantMessages = messages.filter((msg) => msg.role === 'assistant')
 
   useEffect(() => {
@@ -51,11 +54,12 @@ export default function Home() {
     retrieveValueFromLocalStorage('model', setModel, 'gpt-4')
   }, [])
 
-  const displayFileTree = async (fileTree, indentLevel = 0) => {
+  const displayFileTree = async (fileTree, indentLevel = 0, parentPath = '') => {
     let allFiles = []
     for (const file of fileTree) {
       file.indentLevel = indentLevel
-      allFiles.push(file)
+      const filePath = `${parentPath}/${file.name}`
+      allFiles.push({ ...file, path: filePath })
       if (file.type === 'dir') {
         const headers = {} as any
         if (gitHubToken) {
@@ -65,7 +69,7 @@ export default function Home() {
         const childFileTree = await response.json()
         // Ensure that childFileTree is an array before trying to iterate over it
         if (Array.isArray(childFileTree)) {
-          const childFiles = await displayFileTree(childFileTree, indentLevel + 1)
+          const childFiles = await displayFileTree(childFileTree, indentLevel + 1, filePath)
           allFiles = [...allFiles, ...childFiles]
         } else {
           console.error('Child file tree is not iterable:', childFileTree)
@@ -77,13 +81,28 @@ export default function Home() {
 
   const handleSelectFile = (file, checked) => {
     setSelectedFiles((prevFiles) => {
+      let updatedFiles
       if (checked) {
-        // New file selected
-        return [...prevFiles, file]
+        updatedFiles = [...prevFiles, file]
       } else {
-        // File unselected, remove it
-        return prevFiles.filter((f) => f !== file)
+        updatedFiles = prevFiles.filter((f) => !f.path.startsWith(file.path))
       }
+
+      // Select/unselect nested files and folders
+      if (file.type === 'dir') {
+        const nestedFiles = fileTree.filter((f) => f.path.startsWith(file.path))
+        nestedFiles.forEach((nestedFile) => {
+          if (checked) {
+            if (!updatedFiles.includes(nestedFile)) {
+              updatedFiles.push(nestedFile)
+            }
+          } else {
+            updatedFiles = updatedFiles.filter((f) => f.path !== nestedFile.path)
+          }
+        })
+      }
+
+      return updatedFiles
     })
   }
 
@@ -176,12 +195,24 @@ export default function Home() {
   }, [openAIApiKey])
 
   useEffect(() => {
-    // Call this function when checkboxes state changes
     updateMergedFilesPreview()
   }, [fileTree])
 
+  const handleFolderClick = (folderPath) => {
+    setExpandedFolders((prev) => {
+      const isExpanded = !prev[folderPath]
+      const updatedFolders = { ...prev, [folderPath]: isExpanded }
+
+      // Select/unselect nested files and folders
+      const nestedFiles = fileTree.filter((file) => file.path.startsWith(folderPath))
+      nestedFiles.forEach((file) => handleSelectFile(file, isExpanded))
+
+      return updatedFolders
+    })
+  }
+
   return (
-    <main className="bg-background text-secondary ">
+    <main className="bg-background text-secondary">
       <div className="bg-surface font-sans px-5 max-w-5xl mx-auto shadow-l-lg relative py-4">
         <GhRibbon />
         <h1 className="font-bold text-2xl mb-5 text-primary">🗃️ RepoGPT</h1>
@@ -225,6 +256,7 @@ export default function Home() {
           </div>
           {githubError && <div className="text-error">{githubError}</div>}
         </form>
+
         <div className="flex flex-col lg:flex-row flex-wrap gap-2 mb-4">
           <div className="mb-2 lg:mb-5 lg:min-w-[225px]">
             <h2 className="mb-2">Select Files</h2>
@@ -234,12 +266,15 @@ export default function Home() {
                   <label
                     className={twMerge(
                       'text-secondary opacity-90',
-                      selectedFiles.includes(file) && 'text-primary opacity-100',
-                      file.type === 'dir' && 'opacity-70'
+                      selectedFiles.includes(file) && 'opacity-100',
+                      file.type === 'dir' && 'text-primary',
+                      expandedFolders[file.path] && 'font-bold'
                     )}
                   >
                     {file.type === 'dir' ? (
-                      <>📁 </>
+                      <span onClick={() => handleFolderClick(file.path)} className="cursor-pointer">
+                        {expandedFolders[file.path] ? '📂' : '📁'}
+                      </span>
                     ) : (
                       <input
                         className="mr-2"
@@ -254,6 +289,7 @@ export default function Home() {
               ))}
             </div>
           </div>
+
           <div className="flex-grow flex flex-col">
             <div className="flex space-x-2 mb-2">
               <h2>Merged Files</h2>
@@ -354,7 +390,8 @@ export default function Home() {
           name="response"
           rows={20}
           cols={80}
-          value={assistantMessages.length < 1 ? '' : assistantMessages.map((msg, i) => msg.content)}
+          value={assistantMessages.length < 1 ? '' : assistantMessages.map((msg) => msg.content).join('\n')}
+          readOnly
         ></textarea>
       </div>
     </main>
