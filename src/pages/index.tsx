@@ -240,14 +240,14 @@ export default function Home() {
             <div id="file-tree" className="text-sm">
               {fileTree.map((file, index) => (
                 <div key={index} style={{ marginLeft: `${file.indentLevel * 10}px` }}>
-                  <label
+                  {/* <label
                     className={twMerge(
                       'text-secondary opacity-90',
                       selectedFiles.includes(file) && 'text-primary opacity-100',
                       file.type === 'dir' && 'opacity-70'
                     )}
                     {file.name}
-                  </label>
+                  </label> */}
                   {file.type === 'dir' && expandedFolders[file.path] && (
                     <div>
                       {fileTree
@@ -279,7 +279,7 @@ export default function Home() {
                         ))}
                     </div>
                   )}
-                  >
+           
                     {file.type === 'dir' ? (
                       <span onClick={() => handleFolderClick(file.path)} className="cursor-pointer">
                         {expandedFolders[file.path] ? '📂' : '📁'} 
