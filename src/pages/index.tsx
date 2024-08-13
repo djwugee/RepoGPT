@@ -267,7 +267,7 @@ export default function Home() {
                     className={twMerge(
                       'text-secondary opacity-90',
                       selectedFiles.includes(file) && 'text-primary opacity-100',
-                      file.type === 'dir' && 'opacity-70'
+                      file.type === 'dir' && 'font-bold text-primary'
                     )}
                   >
                     {file.type === 'dir' ? (
